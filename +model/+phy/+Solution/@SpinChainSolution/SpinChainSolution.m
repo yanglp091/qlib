@@ -73,14 +73,14 @@ classdef SpinChainSolution < model.phy.Solution.AbstractSolution
             matrix_strategy=FromKronProd();
             [hamiltonian, liouvillian] = obj.GetHamiltonianLiouvillian(spin_collection,matrix_strategy);
             initial_state              = obj.GetInitialState(spin_collection,matrix_strategy);
-%             observables                = obj.GetObservables(spin_collection,matrix_strategy);
+            observables                = obj.GetObservables(spin_collection,matrix_strategy);
                                     
-%             dynamics                   = obj.StateEvolve(hamiltonian, liouvillian, initial_state);
-%             mean_values                = obj.GetMeanValues(dynamics, observables);
+            dynamics                   = obj.StateEvolve(hamiltonian, liouvillian, initial_state);
+            mean_values                = obj.GetMeanValues(dynamics, observables);
             final_states=dynamics.kernel.result;         
             [~] = obj.GetStateInfo(spin_collection,final_states);
 
-            obj.StoreKeyVariables(spin_collection, hamiltonian, liouvillian, initial_state, dynamics);%
+            obj.StoreKeyVariables(spin_collection, hamiltonian, liouvillian, initial_state, dynamics,mean_values);%
         end
     end
     
