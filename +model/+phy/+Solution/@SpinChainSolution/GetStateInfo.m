@@ -4,14 +4,14 @@ function [spin_num_list, probability_mat ] = GetStateInfo(obj, spin_collection,r
 
     nspin=spin_collection.getLength;
     ts_superoperator= model.phy.QuantumOperator.SpinOperator.TransformSuperOperator(spin_collection);
-    ts_mat=ts_superoperator.getMatrix;
-    rho_vec_IST=ts_mat*rho_vecs;
+    IST_transform_operator=ts_superoperator.getMatrix;
+    rho_vec_IST=IST_transform_operator*rho_vecs;
     
     norm_factor=sqrt(rho_vecs(:,1)'*rho_vecs(:,1));
     [state_list_cell, probability_cell]=state_info(rho_vec_IST,nspin,norm_factor);    
     [spin_num_list,probability_mat]=cal_probability_mat(state_list_cell,probability_cell,nspin);
     
-    obj.StoreKeyVariables(spin_num_list,probability_mat,state_list_cell,probability_cell);
+    obj.StoreKeyVariables(spin_num_list,probability_mat,state_list_cell,probability_cell,IST_transform_operator);
 end
 
 function [state_list_cell,probability_cell]=state_info(states_IST,nspin,norm_factor)
