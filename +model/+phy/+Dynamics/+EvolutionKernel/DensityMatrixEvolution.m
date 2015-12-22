@@ -11,20 +11,20 @@ classdef DensityMatrixEvolution< model.phy.Dynamics.AbstractEvolutionKernel
     end
     
     methods
-          function obj=DensityMatrixEvolution(qoperatorList, prefactor)
-              noperator=length(qoperatorList);
-               if nargin>1
-                   obj.matrix_prefactor=prefactor;
-               else
-                   obj.matrix_prefactor=[-1,1];
-               end
-               
-               obj.matrixList=cell(1,noperator);
+          function obj=DensityMatrixEvolution(qoperatorList,initial_state_type, prefactor)
+              noperator=length(qoperatorList);               
+              obj.matrixList=cell(1,noperator);
 
-               for n=1:noperator
+              for n=1:noperator
                    obj.matrixList{1,n}=obj.matrix_prefactor(n)*qoperatorList{n}.getMatrix();
-               end
-                obj.result=0;
+              end
+              if nargin>2
+                   obj.matrix_prefactor=prefactor;
+              else
+                   obj.matrix_prefactor=[-1,1];
+              end
+              obj.initial_state_type=initial_state_type;             
+              obj.result=0;
           end
                  
           function state_out = calculate_evolution(obj, state_in, timelist)
