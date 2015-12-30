@@ -5,19 +5,20 @@ classdef AbstractClusterCoherence < handle
     properties
       spin_collection
       coherence
-      hamiltonian_list
+      hamiltonian_cell
+      hami_idx_list      
       preoperator_factor
       npulse
     end
     
     methods
-        function obj=AbstractClusterCoherence(cluster)            
+        function obj=AbstractClusterCoherence(cluster_sc)            
             if nargin>0
-                obj.generate(cluster);
+                obj.generate(cluster_sc);
             end
         end 
-        function generate(obj,cluster)
-            obj.spin_collection=cluster;
+        function generate(obj,cluster_sc)
+            obj.spin_collection=cluster_sc;
         end
         %  generate reduced hamiltonian for the given central spin states
         function reduced_hami = gen_reduced_hamiltonian(obj,center_spin_state,is_secular)
@@ -58,15 +59,15 @@ classdef AbstractClusterCoherence < handle
                  parity=parity_list(m); 
                  switch parity
                         case 0
-                            hami=hamiCell{1,1};                       
+                            hami=hamiCell{1};                       
                         case 1
-                            hami=hamiCell{1,2};
+                            hami=hamiCell{2};
                         otherwise
                             error('wrong parity of the index of the hamiltonian sequence.');
                  end
                  hami_list{m}=hami;
             end
-            obj.hamiltonian_list=hami_list;
+            obj.hami_idx_list=hami_list;
             obj.preoperator_factor=time_seq;
         end
 

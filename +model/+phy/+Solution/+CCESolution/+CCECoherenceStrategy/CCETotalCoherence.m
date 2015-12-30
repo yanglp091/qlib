@@ -30,13 +30,13 @@ classdef CCETotalCoherence < handle
 
                bath_cluster=iter.getItem(n);
                central_espin={obj.center_spin.espin};
-               cluster=model.phy.SpinCollection.SpinCollection();
-               cluster.spin_source=model.phy.SpinCollection.Strategy.FromSpinList([central_espin, bath_cluster]);
-               cluster.generate();
+               cluster_sc=model.phy.SpinCollection.SpinCollection();% spin collection of a cluster
+               cluster_sc.spin_source=model.phy.SpinCollection.Strategy.FromSpinList([central_espin, bath_cluster]);
+               cluster_sc.generate();
                 
                strategy_name=obj.cluster_coherence_strategy;
                cluster_strategy=model.phy.Solution.CCESolution.CCECoherenceStrategy.(strategy_name);
-               cluster_strategy.generate(cluster);
+               cluster_strategy.generate(cluster_sc);
                cluster_cell{1,n}=cluster_strategy;
 
             end

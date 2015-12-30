@@ -16,8 +16,8 @@ function dynamics = StateEvolve( obj,hami1,hami2,liou1,liou2,state )
         nsection=para.nsection;
         p=para.proportion;        
         prefactors=ones(1,2*nsection);
-        prefactors(1,1:2:nsection-1)=-1i*(1-p)/nsection;
-        prefactors(1,2:2:nsection)=-1i*p/nsection;
+        prefactors(1,1:2:2*nsection-1)=-1i*(1-p)/nsection;
+        prefactors(1,2:2:2*nsection)=-1i*p/nsection;
         kern=MatrixVectorEvolution(ops, para.InitialStateType,prefactors);
     else
         ops={hami1,hami2};
