@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+   <Dynamics>
+      <TimeList type="eval">0:0.5:1</TimeList>
+   </Dynamics>
+   <InitialState>
+      <Type type="char">MixedState</Type>
+      <StateVector type="double">2</StateVector>
+      <DensityMatrix type="char">1.0 * p(1)_1</DensityMatrix>
+   </InitialState>
+   <Interaction>
+      <OnSite type="eval">1.0*ones(1, 2)</OnSite>
+      <DqtInt type="eval">1.0*ones(1, 1)</DqtInt>
+      <XYInt type="eval">0.0*ones(1, 1)</XYInt>
+      <dipInt type="double">0</dipInt>
+   </Interaction>
+   <Name>
+      <SolutionName type="char">SpinChain</SolutionName>
+   </Name>
+   <Observable>
+      <ObservableNumber type="double">5</ObservableNumber>
+      <ObservableName1 type="char">sz1</ObservableName1>
+      <ObservableString1 type="char">1.0 * sz_1</ObservableString1>
+      <ObservableName2 type="char">sz2</ObservableName2>
+      <ObservableString2 type="char">1.0 * sz_2</ObservableString2>
+      <ObservableName3 type="char">sz3</ObservableName3>
+      <ObservableString3 type="char">1.0 * sz_3</ObservableString3>
+      <ObservableName4 type="char">sz4</ObservableName4>
+      <ObservableString4 type="char">1.0 * sz_4</ObservableString4>
+      <ObservableName5 type="char">sz5</ObservableName5>
+      <ObservableString5 type="char">1.0 * sz_5</ObservableString5>
+   </Observable>
+   <SpinCollection>
+      <SpinNum type="double">2</SpinNum>
+      <SpinType type="char">13C</SpinType>
+      <Source type="char">Chain_1D</Source>
+   </SpinCollection>
+</config>
