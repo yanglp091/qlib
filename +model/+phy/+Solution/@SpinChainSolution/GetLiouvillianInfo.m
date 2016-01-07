@@ -11,8 +11,9 @@ function  [liouvillian_sorted,state_list_sorted]=GetLiouvillianInfo( obj )
     [~]=rss.generate_clusters();
     state_list=rss.generate_state_list;
     
-    liou_mat=sparse(full(obj.result.liouvillian.matrix));
-    IST_ts_mat=sparse(full(obj.result.IST_transform_operator));
+    liou_mat=sparse(obj.result.liouvillian.matrix);
+    IST_ts_mat=obj.result.IST_transform_operator.getMatrix;
+    IST_ts_mat=sparse(IST_ts_mat);
     liou_mat=IST_ts_mat*liou_mat*IST_ts_mat';
     [liouvillian_sorted,state_list_sorted]=resort_liouvillian( liou_mat,state_list );
     obj.StoreKeyVariables(liouvillian_sorted,state_list_sorted);
@@ -29,11 +30,9 @@ end
 A=[state_list,nz_list];
 col_index=fliplr(1:(nc+1));
 [A,cols]=sortrows(A,col_index);
-rows=transpose(1:nr);
-vals=ones(nr,1);
-trans_mat=sparse(rows,cols,vals,nr,nr);
+
 state_list_sorted=A(:,1:nc);
-liouvillian_sorted=trans_mat*liou_mat*trans_mat';
-liouvillian_sorted=sparse(liouvillian_sorted);
+
+liouvillian_sorted=liou_mat(cols,cols);
 end
 
