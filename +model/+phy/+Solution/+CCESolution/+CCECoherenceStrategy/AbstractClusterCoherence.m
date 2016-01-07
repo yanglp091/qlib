@@ -140,7 +140,7 @@ classdef AbstractClusterCoherence < handle
             coh=dynamics.observable_values;
         end
     
-        function coh_tilde=calculater_cluster_coherence_tilde(obj,center_spin_states,timelist,varargin)
+        function [coh,coh_tilde]=calculater_cluster_coherence_tilde(obj,center_spin_states,timelist,varargin)
             %   Calculate the tilde coherence of a given cluster
             p = inputParser;
             addRequired(p,'center_spin_states');

@@ -41,7 +41,7 @@ classdef ECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStrat
             denseMat.setMatrix(eye(dim)/dim);
             
 
-            if dim<1000
+            if dim<2000
                 coh=obj.calculate_coherence_hilbert(bath_cluster,denseMat,'MixedState',timelist);
             else
                 coh=obj.calculate_coherence_liouville(bath_cluster,denseMat,'MixedState',timelist);

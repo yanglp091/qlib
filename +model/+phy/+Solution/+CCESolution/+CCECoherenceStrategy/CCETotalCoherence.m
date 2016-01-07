@@ -7,7 +7,7 @@ classdef CCETotalCoherence < handle
         cluster_coherence_strategy
         center_spin        
         coherence_matrix
-        cluster_coherence_tilde_matrix
+        coherence_tilde_matrix
         coherence
     end
     
@@ -122,7 +122,7 @@ classdef CCETotalCoherence < handle
             end
             coh.('coherence')= coh_total;            
            if ncluster<20000          
-               obj.cluster_coherence_tilde_matrix=coh_tilde_mat;
+               obj.coherence_tilde_matrix=coh_tilde_mat;
            else
                timeTag=datestr(clock,'yyyymmdd_HHMMSS');
                save([OUTPUT_FILE_PATH, 'coherence_tilde_matrix', timeTag, '.mat'],'coh_tilde_mat');

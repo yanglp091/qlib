@@ -132,7 +132,7 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
            ncluster=cluster_iterator.cluster_info.cluster_number;
            if ncluster<20000;
                obj.keyVariables('coherence_matrix')=total_coherence.coherence_matrix;
-               obj.keyVariables('cluster_coherence_tilde_matrix')=total_coherence.cluster_coherence_tilde_matrix;
+               obj.keyVariables('coherence_tilde_matrix')=total_coherence.coherence_tilde_matrix;
            end
            obj.keyVariables('coherence')=total_coherence.coherence;
 %            obj.render=dynamics.render;
