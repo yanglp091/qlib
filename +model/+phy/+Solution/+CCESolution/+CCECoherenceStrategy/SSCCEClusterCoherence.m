@@ -1,27 +1,36 @@
-classdef ECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStrategy.AbstractClusterCoherence
+classdef SSCCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStrategy.AbstractClusterCoherence
     %ECCECLUSTERCOHERENCE 
-                %calculate the coherence of single cluster for ensemble CCE 
+                %calculate the coherence of single cluster for single sample CCE 
     properties
-      coherence_tilde
+      bath_spin_state
     end
     
     methods
-        function obj=ECCEClusterCoherence(cluster_spin_index,cluster_parameters)
+        function obj=SSCCEClusterCoherence(cluster_spin_index,cluster_parameters)
             obj@model.phy.Solution.CCESolution.CCECoherenceStrategy.AbstractClusterCoherence();
             if nargin >0
-               obj.generate(cluster_spin_index,cluster_parameters); 
+               obj.generate(cluster_spin_index,cluster_parameters);
+               obj.bath_spin_state=cluster_parameters.bath_spin_state;
             end                    
         end
         
-        function coh=calculate_cluster_coherence(obj,evolution_para,varargin)
-            obj.npulse=evolution_para.npulse;
-            center_spin_states=evolution_para.center_spin_states;
-            is_secular=evolution_para.is_secular;
-            timelist=evolution_para.timelist;
+        function coh=calculate_cluster_coherence(obj,center_spin_states,timelist,varargin)
+            p = inputParser;
+            addRequired(p,'center_spin_states');
+            addRequired(p,'timelist');
+            addOptional(p,'npulse',0,@isnumeric);
+            addOptional(p,'is_secular',0,@isnumeric); 
+
+            parse(p,center_spin_states,timelist,varargin{:});
+
+            obj.npulse=p.Results.npulse;
+            center_spin_states=p.Results.center_spin_states;
+            is_secular=p.Results.is_secular;
+            timelist=p.Results.timelist;
             
             %generate the spin_collection for this cluster including the central spin
             obj.spin_collection= model.phy.SpinCollection.SpinCollection();
-            obj.spin_collection.spin_source=model.phy.SpinCollection.Strategy.FromSpinList([{obj.center_spin},obj.cluster_bath_spin]);
+            obj.spin_collection.spin_source=model.phy.SpinCollection.Strategy.FromSpinList([{obj.central_spin},obj.cluster_bath_spin]);
             obj.spin_collection.generate();
              
             hamiCell=obj.gen_reduced_hamiltonian(center_spin_states,is_secular);
@@ -45,6 +54,11 @@ classdef ECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStrat
                 coh=obj.calculate_coherence_liouville(bath_cluster_sc,denseMat,'MixedState',timelist);
             end
             obj.coherence=coh;
+        end
+        
+        function set_local_field(obj)
+            
+            
         end
                        
     end

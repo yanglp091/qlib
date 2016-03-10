@@ -1,4 +1,4 @@
-classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
+classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
     %ENSEMBLECCESOLUTION Summary of this class goes here
     %   EnsembleCCESolution needs the following input paramters:
     %   1. parameters.SpinCollectionStrategy
@@ -19,11 +19,11 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
     end
     
     methods
-        function obj=EnsembleCCESolution(xml_file)
+        function obj=SingleSampleCCESolution(xml_file)
             obj@model.phy.Solution.CCESolution.AbstractCCESolution(xml_file);
-        end                    
-           
-        function perform(obj)                              
+        end
+        
+         function perform(obj)           
            %%  Generate Spin Collection FromSpinList and generate clusters 
            cluster_iterator=obj.generate_cluster_iterator();
            [evolution_para,cluster_para]=obj.pre_calculation(cluster_iterator);
@@ -48,8 +48,20 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
            
            cluster_parameter.center_spin=center_spin.espin;
            cluster_parameter.bath_spin_collection=cluster_iterator.spin_collection;
+           cluster_parameter.bath_spin_state=generate_bath_spin_state(cluster_iterator);
         end
-
+        function bs_state=generate_bath_spin_state(cluster_iterator)
+            seed=obj.parameters.seed;
+            nspin=cluster_iterator.spin_collection.getLength;
+            dim_list=cluster_iterator.spin_collection.getDimList;
+            rng(seed);rand_numbers=randi([1,100],1,nspin);
+            
+            bs_state=zeros(1,nspin);
+            for kk=1:nspin
+               dim=dim_list(kk); 
+               bs_state(1,kk)=mod(rand_numbers(kk),dim)+1; 
+            end
+        end
         
     end
     
