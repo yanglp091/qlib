@@ -18,6 +18,8 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
                 obj.parameters.InputFile=p.get_parameter('SpinCollection', 'FileName');
                 obj.BathSpinParameters(p);
                 disp('spin collection loaded.');
+            else
+                obj.BathSpinParameters(p);
             end
                         
             obj.parameters.load_cluster_iter=p.get_parameter('Clustering','LoadCluterIterator');
@@ -101,6 +103,12 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
             
             if obj.parameters.load_cluster_iter             
                  cluster_iterator=obj.keyVariables('cluster_iterator');
+                 if obj.parameters.SetBathSpins.SetSpin;
+                     paraCell=obj.parameters.SetBathSpins.BathSpinsSettingCell;
+                     cluster_iterator.spin_collection.set_spin(paraCell);
+                 else
+                     cluster_iterator.spin_collection.set_spin();
+                 end
             else             
                   switch obj.parameters.SpinCollectionStrategy
                        case 'File'
@@ -141,7 +149,7 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
 %            evolu_para.strategy_name:: CCE strategy name
 %            evolu_para.timelist:: the evolution time list
 
-%%         cluster parameters
+%         cluster parameters
 %           clst_para.bath_spin_collection:: a SpinCollection, including the  all bath spins
 %           clst_para.center_spin:: a Spin
 %           clst_para.bath_spin_state:: a list gives out the specific configuration of the bath
@@ -158,31 +166,47 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
            CoherenceMatrix=zeros(ncluster,ntime);
            disp('calculate the cluster-coherence matrix ...');
            tic
-           parpool();
-           parfor n=1:ncluster 
-              Condition=model.phy.LabCondition.getCondition;              
-              Condition.setValue('magnetic_field',MagneticField);
-              
-              %calculate cluster coherence              
-              clst_index=cluster_index_list{n,1};
-               %Here, I try to add a field "clst_index" in the structure data "clst_para" in every loop first. 
-               % But this action is forbidden in parfor circulation. So I have to change the way to construct 
-               % the AbstractClusterCoherence class. This is pretty ulgy, but I have to do this. 
-              switch strategy_name
-                  case 'EnsembleCCE'
-                      import model.phy.Solution.CCESolution.CCECoherenceStrategy.ECCEClusterCoherence 
-                      clst_coh=ECCEClusterCoherence(clst_index,clst_para);                     
-                  case 'SingleSamleCCE'
-                      import model.phy.Solution.CCESolution.CCECoherenceStrategy.SSCCEClusterCoherence
-                      clst_coh=SSCCEClusterCoherence(clst_index,clst_para);                     
-                  otherwise
-                      error('No such CCE method.......');              
-              end
-              
-              CoherenceMatrix(n,:)=clst_coh.calculate_cluster_coherence(evolu_para);
-              delete(clst_coh);
-           end
-           delete(gcp('nocreate'));
+           
+          %In order to eliminate the parfor warning, I have to arrange the
+          %swith...case... in this form. Beside, I try to add a field "clst_index" in the structure data "clst_para" in every loop first. 
+          % But this action is forbidden in parfor circulation. So I have to change the way to construct 
+          % the AbstractClusterCoherence class. This is pretty ulgy, but I have to do this. 
+           switch strategy_name
+              case 'EnsembleCCE'
+                      parpool();
+                      parfor n=1:ncluster 
+                          Condition=model.phy.LabCondition.getCondition;              
+                          Condition.setValue('magnetic_field',MagneticField);
+
+                          %calculate cluster coherence              
+                          clst_index=cluster_index_list{n,1};
+                          import model.phy.Solution.CCESolution.CCECoherenceStrategy.ECCEClusterCoherence 
+                          clst_coh=ECCEClusterCoherence(clst_index,clst_para);
+                          CoherenceMatrix(n,:)=clst_coh.calculate_cluster_coherence(evolu_para);
+                          delete(clst_coh);
+                      end
+                      delete(gcp('nocreate'));
+                                       
+              case 'SingleSampleCCE'
+%                       parpool();
+                      for n=1:ncluster 
+%                           disp(['calculating the ' num2str(n) 'th cluster coherence....']);
+                          Condition=model.phy.LabCondition.getCondition;              
+                          Condition.setValue('magnetic_field',MagneticField);
+
+                          %calculate cluster coherence              
+                          clst_index=cluster_index_list{n,1};
+                          import model.phy.Solution.CCESolution.CCECoherenceStrategy.SSCCEClusterCoherence
+                          clst_coh=SSCCEClusterCoherence(clst_index,clst_para);
+                          CoherenceMatrix(n,:)=clst_coh.calculate_cluster_coherence(evolu_para);
+                          delete(clst_coh);
+                      end
+%                       delete(gcp('nocreate'));
+               otherwise
+                       error('No such CCE method.......');              
+            end
+
+
            toc
            disp('calculation of the cluster-coherence matrix finished.');          
 

@@ -23,7 +23,10 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
             obj@model.phy.Solution.CCESolution.AbstractCCESolution(xml_file);
         end
         
-         function perform(obj)           
+         function perform(obj)
+           Condition=model.phy.LabCondition.getCondition;              
+           Condition.setValue('magnetic_field',obj.parameters.MagneticField);  
+             
            %%  Generate Spin Collection FromSpinList and generate clusters 
            cluster_iterator=obj.generate_cluster_iterator();
            [evolution_para,cluster_para]=obj.pre_calculation(cluster_iterator);
@@ -48,9 +51,9 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
            
            cluster_parameter.center_spin=center_spin.espin;
            cluster_parameter.bath_spin_collection=cluster_iterator.spin_collection;
-           cluster_parameter.bath_spin_state=generate_bath_spin_state(cluster_iterator);
+           cluster_parameter.bath_spin_state=obj.generate_bath_spin_state(cluster_iterator);
         end
-        function bs_state=generate_bath_spin_state(cluster_iterator)
+        function bs_state=generate_bath_spin_state(obj,cluster_iterator)
             seed=obj.parameters.seed;
             nspin=cluster_iterator.spin_collection.getLength;
             dim_list=cluster_iterator.spin_collection.getDimList;

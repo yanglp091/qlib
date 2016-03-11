@@ -130,13 +130,25 @@ classdef AbstractClusterCoherence < handle
             obs=model.phy.QuantumOperator.SpinOperator.Observable(bath_cluster,'IdentityMatrix');
             obs.setMatrix(1);
             % Evolution
-            d_mat_evolution=model.phy.Dynamics.EvolutionKernel.DensityMatrixEvolution(h_list,statetype,hami_prefactor);
-            dynamics=model.phy.Dynamics.QuantumDynamics(d_mat_evolution);
-            dynamics.set_initial_state(state,'Hilbert');
-
-            dynamics.set_time_sequence(timelist);
-            dynamics.addObervable({obs});
-            dynamics.calculate_mean_values();
+            switch statetype
+                case 'MixedState' 
+                    d_mat_evolution=model.phy.Dynamics.EvolutionKernel.DensityMatrixEvolution(h_list,statetype,hami_prefactor);
+                    dynamics=model.phy.Dynamics.QuantumDynamics(d_mat_evolution);
+                    dynamics.set_initial_state(state,'Hilbert');
+                    dynamics.set_time_sequence(timelist);
+                    dynamics.addObervable({obs});
+                    dynamics.calculate_mean_values();
+                case 'PureState'
+                    wavefun_evolution=model.phy.Dynamics.EvolutionKernel.WavefunctionEvolution(h_list,statetype,hami_prefactor);
+                    dynamics=model.phy.Dynamics.QuantumDynamics(wavefun_evolution);
+                    dynamics.set_initial_state(state);
+                    dynamics.set_time_sequence(timelist);
+                    dynamics.addObervable({obs});
+                    dynamics.calculate_mean_values(state');
+                otherwise
+                    error('No corresponding EvolutionKernel for  such kind of quantum state in Dynamics.');                    
+            end
+                    
             coh=dynamics.observable_values;
         end
 
