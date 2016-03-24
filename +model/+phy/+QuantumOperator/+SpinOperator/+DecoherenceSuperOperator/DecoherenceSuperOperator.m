@@ -13,24 +13,20 @@ classdef DecoherenceSuperOperator < model.phy.QuantumOperator.MultiSpinSuperOper
     % occupation number of the bosonic mode with frequency omega.
     
     
-    properties
-        decay_rate_list
-        
+    properties       
     end
     
     methods
-        function obj=DecoherenceSuperOperator(spin_collection,decay_rate_list)
+        function obj=DecoherenceSuperOperator(spin_collection)
             obj@model.phy.QuantumOperator.MultiSpinSuperOperator(spin_collection);
-            obj.name='decoherence_super_operator';
-            
-            obj.decay_rate_list=decay_rate_list;
         end
         
         function generate_matrix(obj)
             obj.matrix=obj.calculate_matrix();
             obj.hasMatrix=1;
-        end
+        end        
     end
+    
     
 end
 

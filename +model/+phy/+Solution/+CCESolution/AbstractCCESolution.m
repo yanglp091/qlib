@@ -190,7 +190,7 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
               case 'SingleSampleCCE'
 %                       parpool();
                       for n=1:ncluster 
-%                           disp(['calculating the ' num2str(n) 'th cluster coherence....']);
+                          disp(['calculating the ' num2str(n) 'th cluster coherence....']);
                           Condition=model.phy.LabCondition.getCondition;              
                           Condition.setValue('magnetic_field',MagneticField);
 
