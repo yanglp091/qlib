@@ -2,8 +2,13 @@ classdef AbstractClusterCoherence < handle
     %ABSTRACTCLUSTERCOHERENCE Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
-      spin_collection
+    properties        
+      center_spin% a Spin 
+      spin_collection% a SpinCollection: the first spin is the central spin, the rest are bath spins of this cluster
+      cluster_bath_spin% a cell including bath spins of this cluster
+      bath_spin_collection% a SpinCollection including all bath spins for CCE
+      cluster_spin_index% the index of the bath spins of this cluster in bath_spin_collection, e.g. [1,2,3] 
+      
       coherence
       hamiltonian_cell
       hami_list      
@@ -12,13 +17,24 @@ classdef AbstractClusterCoherence < handle
     end
     
     methods
-        function obj=AbstractClusterCoherence(cluster_sc)            
+        function obj=AbstractClusterCoherence(cluster_spin_index,cluster_parameters)   
+            % The input "bath_spins" is a SpinCollection, including the  all bath spins. 
+            % The input "cspin" is a Spin 
+            % The input "cluster_spin_index" is the index of  bath spin of this cluster in bath_spins            
             if nargin>0
-                obj.generate(cluster_sc);
+                obj.generate(cluster_spin_index,cluster_parameters);
             end
         end 
-        function generate(obj,cluster_sc)
-            obj.spin_collection=cluster_sc;
+        function generate(obj,clst_indx,cluster_parameters)
+            obj.center_spin=cluster_parameters.center_spin;
+            obj.bath_spin_collection=cluster_parameters.bath_spin_collection;
+            obj.cluster_spin_index=clst_indx;
+            spin_cell=cell(1, length(clst_indx) );
+            for kk=1:length(clst_indx)
+                idx=clst_indx(kk);
+                spin_cell{kk}=obj.bath_spin_collection.spin_list{idx};
+            end
+            obj.cluster_bath_spin=spin_cell;
         end
         %  generate reduced hamiltonian for the given central spin states
         function reduced_hami = gen_reduced_hamiltonian(obj,center_spin_state,is_secular)
@@ -114,13 +130,25 @@ classdef AbstractClusterCoherence < handle
             obs=model.phy.QuantumOperator.SpinOperator.Observable(bath_cluster,'IdentityMatrix');
             obs.setMatrix(1);
             % Evolution
-            d_mat_evolution=model.phy.Dynamics.EvolutionKernel.DensityMatrixEvolution(h_list,statetype,hami_prefactor);
-            dynamics=model.phy.Dynamics.QuantumDynamics(d_mat_evolution);
-            dynamics.set_initial_state(state,'Hilbert');
-
-            dynamics.set_time_sequence(timelist);
-            dynamics.addObervable({obs});
-            dynamics.calculate_mean_values();
+            switch statetype
+                case 'MixedState' 
+                    d_mat_evolution=model.phy.Dynamics.EvolutionKernel.DensityMatrixEvolution(h_list,statetype,hami_prefactor);
+                    dynamics=model.phy.Dynamics.QuantumDynamics(d_mat_evolution);
+                    dynamics.set_initial_state(state,'Hilbert');
+                    dynamics.set_time_sequence(timelist);
+                    dynamics.addObervable({obs});
+                    dynamics.calculate_mean_values();
+                case 'PureState'
+                    wavefun_evolution=model.phy.Dynamics.EvolutionKernel.WavefunctionEvolution(h_list,statetype,hami_prefactor);
+                    dynamics=model.phy.Dynamics.QuantumDynamics(wavefun_evolution);
+                    dynamics.set_initial_state(state);
+                    dynamics.set_time_sequence(timelist);
+                    dynamics.addObervable({obs});
+                    dynamics.calculate_mean_values(state');
+                otherwise
+                    error('No corresponding EvolutionKernel for  such kind of quantum state in Dynamics.');                    
+            end
+                    
             coh=dynamics.observable_values;
         end
 
