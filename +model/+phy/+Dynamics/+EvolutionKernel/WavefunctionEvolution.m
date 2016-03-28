@@ -24,7 +24,7 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
               if nargin>2
                    obj.matrix_prefactor=prefactor;
               else
-                   obj.matrix_prefactor=-1;
+                   obj.matrix_prefactor=-1i;
               end             
               obj.result=0;
         end
@@ -38,7 +38,7 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
                core_mat_list=cell(1,noperator);
                evolution_mat_list=cell(1,noperator);
                for m=1:noperator %initial the core matrice                  
-                   core_mat_list{m}=expm(1i*obj.matrix_prefactor(m)*dt*obj.matrixList{1,m});
+                   core_mat_list{m}=expm(obj.matrix_prefactor(m)*dt*obj.matrixList{1,m});
                    evolution_mat_list{m}=1;
                end
                state_out=cell(1,ntime);

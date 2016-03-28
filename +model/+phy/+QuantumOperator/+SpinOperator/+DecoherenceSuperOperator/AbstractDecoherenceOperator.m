@@ -1,4 +1,4 @@
-classdef DecoherenceSuperOperator < model.phy.QuantumOperator.MultiSpinSuperOperator
+classdef AbstractDecoherenceOperator < model.phy.QuantumOperator.MultiSpinSuperOperator
     %DECOHERENCESUPEROPERATOR generate a superoperator to describe the decoherence of the multi-spin system.
     % the total decoherence operator in the Liouville space is the summation of the decoherence operator 
     % for each single spin. But if the spin is not spin half, the corresponding decoherence operator is 
@@ -17,7 +17,7 @@ classdef DecoherenceSuperOperator < model.phy.QuantumOperator.MultiSpinSuperOper
     end
     
     methods
-        function obj=DecoherenceSuperOperator(spin_collection)
+        function obj=AbstractDecoherenceOperator(spin_collection)
             obj@model.phy.QuantumOperator.MultiSpinSuperOperator(spin_collection);
         end
         

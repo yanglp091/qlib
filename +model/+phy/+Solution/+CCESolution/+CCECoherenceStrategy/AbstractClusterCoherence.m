@@ -14,6 +14,7 @@ classdef AbstractClusterCoherence < handle
       hami_list      
       preoperator_factor
       npulse
+      timelist
     end
     
     methods
@@ -65,7 +66,7 @@ classdef AbstractClusterCoherence < handle
         end
         
         % Generate hamiltonian list for the evolution of ensemble CCE with a given pulse number
-        function  [hami_list,time_seq]= gen_hami_list(obj,hamiCell)
+        function  [hami_list,hami_prefactor]= gen_hami_list(obj,hamiCell)
             time_seq=obj.time_ratio_seq();
             len_time_seq=length(time_seq);
             hami_list=cell(1,len_time_seq);
@@ -83,8 +84,7 @@ classdef AbstractClusterCoherence < handle
                  end
                  hami_list{m}=hami;
             end
-            obj.hami_list=hami_list;
-            obj.preoperator_factor=time_seq;
+            hami_prefactor=1i*time_seq;
         end
 
         function time_seq = time_ratio_seq(obj)
@@ -106,43 +106,23 @@ classdef AbstractClusterCoherence < handle
                 time_seq=[-1*seq,seq];
             end     
         end
-        
-        function [liouList,prefactor]=gen_liouvillian_list(obj)
-            h_list=obj.hami_list;
-            hami_prefactor=obj.preoperator_factor;
-            noperator=length(obj.hami_list);
-            if mod(noperator,2)==1
-                error('The number of the cce hamiltonians is not a even number.');
-            end
-            liouList=cell(1,noperator/2);
-            for kk=1:noperator/2
-                hami1=h_list{kk};
-                hami2=h_list{noperator-kk+1};
-                liouList{noperator/2-kk+1}=hami1.flat_sharp_circleC(hami2);
-            end
-            prefactor=-1i*abs(hami_prefactor(1:noperator/2));           
-        end
-    
-        function coh=calculate_coherence_hilbert(obj,bath_cluster,state,statetype,timelist)
-            h_list=obj.hami_list;
-            hami_prefactor=obj.preoperator_factor;
-            %Observable
-            obs=model.phy.QuantumOperator.SpinOperator.Observable(bath_cluster,'IdentityMatrix');
-            obs.setMatrix(1);
+            
+        function coh=calculate_coherence_hilbert(obj,h_list,hami_prefactor,obs,state,statetype)
+            time_list=obj.timelist;
             % Evolution
             switch statetype
                 case 'MixedState' 
                     d_mat_evolution=model.phy.Dynamics.EvolutionKernel.DensityMatrixEvolution(h_list,statetype,hami_prefactor);
                     dynamics=model.phy.Dynamics.QuantumDynamics(d_mat_evolution);
                     dynamics.set_initial_state(state,'Hilbert');
-                    dynamics.set_time_sequence(timelist);
+                    dynamics.set_time_sequence(time_list);
                     dynamics.addObervable({obs});
                     dynamics.calculate_mean_values();
                 case 'PureState'
                     wavefun_evolution=model.phy.Dynamics.EvolutionKernel.WavefunctionEvolution(h_list,statetype,hami_prefactor);
                     dynamics=model.phy.Dynamics.QuantumDynamics(wavefun_evolution);
                     dynamics.set_initial_state(state);
-                    dynamics.set_time_sequence(timelist);
+                    dynamics.set_time_sequence(time_list);
                     dynamics.addObervable({obs});
                     dynamics.calculate_mean_values(state');
                 otherwise
@@ -150,22 +130,19 @@ classdef AbstractClusterCoherence < handle
             end
                     
             coh=dynamics.observable_values;
+            obj.coherence=coh;
         end
 
-        function coh=calculate_coherence_liouville(obj,bath_cluster,state,statetype,timelist)
-            %Observable
-            obs=model.phy.QuantumOperator.SpinOperator.Observable(bath_cluster,'IdentityMatrix');
-            dim=obs.dim;
-            obs.setMatrix(speye(dim));
-            % Evolution
-            [liouList,prefactor]=obj.gen_liouvillian_list();
+        function coh=calculate_coherence_liouville(obj,liouList,prefactor,obs,state,statetype)
+            time_list=obj.timelist;
             d_mat_evolution=model.phy.Dynamics.EvolutionKernel.MatrixVectorEvolution(liouList,statetype,prefactor);
             dynamics=model.phy.Dynamics.QuantumDynamics(d_mat_evolution);
             dynamics.set_initial_state(state,'Liouville');
-            dynamics.set_time_sequence(timelist);
+            dynamics.set_time_sequence(time_list);
             dynamics.addObervable({obs});
             dynamics.calculate_mean_values();
             coh=dynamics.observable_values;
+            obj.coherence=coh;
         end
     
         function [coh,coh_tilde]=calculater_cluster_coherence_tilde(obj,center_spin_states,timelist,varargin)
