@@ -85,9 +85,8 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
               Condition.setValue('magnetic_field',MagneticField);
 
               %calculate cluster coherence              
-              clst_index=cluster_index_list{n,1};
-              import model.phy.Solution.CCESolution.CCECoherenceStrategy.ECCEClusterCoherence 
-              clst_coh=ECCEClusterCoherence(clst_index,clst_para);
+              clst_index=cluster_index_list{n,1};  
+              clst_coh=model.phy.Solution.CCESolution.CCECoherenceStrategy.ECCEClusterCoherence(clst_index,clst_para);
               CoherenceMatrix(n,:)=clst_coh.calculate_cluster_coherence(evolu_para);
               delete(clst_coh);
           end

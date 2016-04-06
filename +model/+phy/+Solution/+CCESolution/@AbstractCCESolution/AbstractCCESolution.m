@@ -72,6 +72,13 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
                     end
                     obj.parameters.SetBathSpins.BathSpinsSettingCell=BathSpinsSettingCell;               
                 end
+                
+                %set the gradient field options
+                obj.parameters.add_gradient_field=p.get_parameter('SetBathSpins','AddGradientField');
+                if obj.parameters.add_gradient_field
+                    obj.parameters.field_gradient=p.get_parameter('SetBathSpins','FieldGradient');
+                end
+                
         end
         
          function CentralSpinParameters(obj,p)

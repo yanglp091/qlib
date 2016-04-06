@@ -27,6 +27,14 @@ function cluster_iterator=generate_cluster_iterator(obj)
                case 'SpinList'
                    error('not surported so far.');
            end
+
+           add_gradient_field=obj.parameters.add_gradient_field;
+           if add_gradient_field
+               field_gradient=obj.parameters.field_gradient;
+               magnetic_field=obj.parameters.MagneticField;
+               field_direction=magnetic_field/norm(magnetic_field);%get the direction of the external homogenous field
+               spin_collection=set_gradient_field(spin_collection,field_gradient,field_direction);
+           end
            obj.keyVariables('spin_collection')=spin_collection;
 
            clu_para.cutoff=obj.parameters.CutOff;
@@ -42,4 +50,13 @@ function cluster_iterator=generate_cluster_iterator(obj)
            save([OUTPUT_FILE_PATH, 'cluster_iterator', obj.timeTag, '.mat'],'cluster_iterator');
            toc
      end
- end
+end
+
+function spin_collection=set_gradient_field(spin_collection,field_gradient,field_direction)  
+    nspin=spin_collection.getLength;
+    for kk=1:nspin
+        spin=spin_collection.spin_list{kk};
+        local_field=spin.coordinate*field_gradient';
+        spin.local_field=local_field*field_direction;
+    end
+end

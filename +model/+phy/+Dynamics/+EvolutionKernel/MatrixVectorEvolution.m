@@ -48,7 +48,7 @@ classdef MatrixVectorEvolution < model.phy.Dynamics.AbstractEvolutionKernel
 
         end
         
-        function single_piece_evolution(obj,state_in,time_list)
+        function state_out=single_piece_evolution(obj,state_in,time_list)
             % This method is used to handle the simple evolution case, i.e.,
             % state_out(t)=exp(Lt).
             % In this case, the final state of the current step can be set

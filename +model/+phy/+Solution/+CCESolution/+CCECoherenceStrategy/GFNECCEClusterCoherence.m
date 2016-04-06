@@ -1,13 +1,13 @@
-classdef DECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStrategy.AbstractClusterCoherence
+classdef GFNECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStrategy.AbstractClusterCoherence
     %ECCECLUSTERCOHERENCE 
-                %calculate the coherence of single cluster for ensemble CCE 
+                %calculate the coherence of single cluster for gradient noise field ensemble CCE 
     properties
       coherence_tilde
-      decay_rate_list
+      correlation_time
     end
     
     methods
-        function obj=DECCEClusterCoherence(cluster_spin_index,cluster_parameters)
+        function obj=GFNECCEClusterCoherence(cluster_spin_index,cluster_parameters)
             obj@model.phy.Solution.CCESolution.CCECoherenceStrategy.AbstractClusterCoherence();
             if nargin >0
                obj.generate(cluster_spin_index,cluster_parameters); 
@@ -18,10 +18,8 @@ classdef DECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStra
             obj.npulse=evolution_para.npulse;
             center_spin_states=evolution_para.center_spin_states;
             is_secular=evolution_para.is_secular;
-            obj.timelist=evolution_para.timelist;
-            
-            obj.decay_rate_list.transverse_decay_rates=evolution_para.transverse_decay_rates;
-            obj.decay_rate_list.parallel_decay_rates=evolution_para.parallel_decay_rates;
+            obj.timelist=evolution_para.timelist;                       
+            obj.correlation_time=evolution_para.correlation_time;
             
             %generate the spin_collection for this cluster including the central spin
             obj.spin_collection= model.phy.SpinCollection.SpinCollection();
@@ -65,15 +63,11 @@ classdef DECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStra
             % to transform a operator (A,B, ...) in the Hilbert space to Liouville space;
             % Transformation of density matrix to a vector in Liouville space must be take the following method:
             % first get the matrix of the density matrix rho, the vec_rho=rho(:);
-            import model.phy.QuantumOperator.SpinOperator.DecoherenceSuperOperator.CNMDecohSuperOperator
+            
+            import model.phy.QuantumOperator.SpinOperator.DecoherenceSuperOperator.GFNMDecohSuperOperator
 
-            nspin=bath_cluster.getLength;
-            transverse_decay_rates=obj.decay_rate_list.transverse_decay_rates;
-            parallel_decay_rates=obj.decay_rate_list.parallel_decay_rates;
-            decay_list.Gamma_vertical_list=transverse_decay_rates*ones(1,nspin);
-            decay_list.Gamma_parallel_list=parallel_decay_rates*ones(1,nspin);
-
-            L_decay=CNMDecohSuperOperator(bath_cluster,decay_list);
+            corr_time=obj.correlation_time;
+            L_decay=GFNMDecohSuperOperator(bath_cluster,corr_time);
             L_decay_mat=L_decay.getMatrix;
             noperator=length(hami_list);
             if mod(noperator,2)==1
