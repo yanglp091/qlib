@@ -84,11 +84,11 @@ classdef GFNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decoher
                 iter=iter_class(obj.spin_collection);
                 nPair=iter.getLength;
                 for kk=1:nPair
+                    iter.setCursor(kk);
                     spins=iter.currentItem();
                     spin_idx=iter.currentIndex();
                     L_pair=obj.gen_superoperator_pair(spins,spin_idx);
-                    L_matrix=L_matrix+L_pair;
-                    iter.nextItem;
+                    L_matrix=L_matrix+L_pair;                   
                 end
             end
         end
