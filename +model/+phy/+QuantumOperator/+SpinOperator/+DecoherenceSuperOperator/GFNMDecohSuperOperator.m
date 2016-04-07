@@ -98,7 +98,7 @@ classdef GFNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decoher
             gradient_field=spin.local_field;
             gammaj=spin.gamma;%the gyromagnetic ratio
             Gammaj=gradient_field*gradient_field'*(gammaj^2)*obj.correlation_time/pi;% the parallel decay rate
-            disp(['The pure dephasing rate of the ' num2str(kk) 'th spin is ' num2str(Gammaj)]);
+%             disp(['The pure dephasing rate of the ' num2str(kk) 'th spin is ' num2str(Gammaj)]);
 
             dim=spin.dim;
             if dim ~=2
@@ -144,8 +144,7 @@ classdef GFNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decoher
             gamma1=spins{1}.gamma;%the gyromagnetic ratio
             gamma2=spins{2}.gamma;%the gyromagnetic ratio
             Gammaij=g_field1*g_field2'*gamma1*gamma2*obj.correlation_time/pi/4;% the parallel decay rate
-            disp(['The pure dephasing rate of the pair [' num2str(index(1) ) ' ' ... 
-                num2str(index(2) ) '] is ' num2str( Gammaij )]);
+%             disp(['The pure dephasing rate of the pair [' num2str(index(1) ) ' ' num2str(index(2) ) '] is ' num2str( Gammaij )]);
                                   
             dim_tot=obj.spin_collection.getDim;
             spin_collection=obj.spin_collection;

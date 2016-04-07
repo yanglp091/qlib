@@ -19,6 +19,9 @@ classdef ECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStrat
             is_secular=evolution_para.is_secular;
             obj.timelist=evolution_para.timelist;
             
+%             gradient_field=obj.cluster_bath_spin{1}.local_field;
+%             disp(['the gradient field of the first spin is' num2str( gradient_field(3) )]);
+
             %generate the spin_collection for this cluster including the central spin
             obj.spin_collection= model.phy.SpinCollection.SpinCollection();
             obj.spin_collection.spin_source=model.phy.SpinCollection.Strategy.FromSpinList([{obj.center_spin},obj.cluster_bath_spin]);
