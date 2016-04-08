@@ -42,23 +42,40 @@ function cluster_iterator=generate_cluster_iterator(obj)
            toc
     end
      
+
+    set_gradient_field(obj,cluster_iterator.spin_collection);%cluster_iterator.spin_collection=
+    reset_gyromagnetic_ratio(obj,cluster_iterator.spin_collection);
+    obj.keyVariables('spin_collection')=cluster_iterator.spin_collection;
+end
+
+function spin_collection=set_gradient_field(obj,spin_collection)
     add_gradient_field=obj.parameters.add_gradient_field;
     if add_gradient_field
        field_gradient=obj.parameters.field_gradient;
     else
         field_gradient=[0,0,0];
     end
+    
     magnetic_field=obj.parameters.MagneticField;
     field_direction=magnetic_field/norm(magnetic_field);%get the direction of the external homogenous field
-    cluster_iterator.spin_collection=set_gradient_field(cluster_iterator.spin_collection,field_gradient,field_direction);
-    obj.keyVariables('spin_collection')=cluster_iterator.spin_collection;
-end
-
-function spin_collection=set_gradient_field(spin_collection,field_gradient,field_direction)  
     nspin=spin_collection.getLength;
     for kk=1:nspin
         spin=spin_collection.spin_list{kk};
         local_field=spin.coordinate*field_gradient';
         spin.local_field=local_field*field_direction;
+    end
+end
+
+function reset_gyromagnetic_ratio(obj,spin_collection)
+    reset_option=obj.parameters.reset_gyromagnetic_ratio;
+    if reset_option
+       gamma=obj.parameters.gamma2reset;
+    else
+        return;
+    end
+    nspin=spin_collection.getLength;
+    for kk=1:nspin
+        spin=spin_collection.spin_list{kk};
+        spin.gamma=gamma;
     end
 end

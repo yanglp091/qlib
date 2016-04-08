@@ -78,6 +78,11 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
                 if obj.parameters.add_gradient_field
                     obj.parameters.field_gradient=p.get_parameter('SetBathSpins','FieldGradient');
                 end
+                % reset the gyromagnetic ratio
+                obj.parameters.reset_gyromagnetic_ratio=p.get_parameter('SetBathSpins','ResetGyroMagneticRatio');
+                if obj.parameters.reset_gyromagnetic_ratio
+                    obj.parameters.gamma2reset=p.get_parameter('SetBathSpins','Gamma2Reset');
+                end
                 
         end
         
