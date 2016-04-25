@@ -83,8 +83,8 @@ classdef DECCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
           % But this action is forbidden in parfor circulation. So I have to change the way to construct 
           % the AbstractClusterCoherence class. This is pretty ulgy, but I have to do this. 
 
-%            parpool();
-           for n=501:ncluster 
+           parpool();
+           parfor n=1:ncluster 
               Condition=model.phy.LabCondition.getCondition;              
               Condition.setValue('magnetic_field',MagneticField);
 %               Condition.setValue('temperature',temperature);
@@ -95,7 +95,7 @@ classdef DECCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
               CoherenceMatrix(n,:)=clst_coh.calculate_cluster_coherence(evolu_para);
               delete(clst_coh);
            end
-%            delete(gcp('nocreate'));
+           delete(gcp('nocreate'));
            toc
            disp('calculation of the cluster-coherence matrix finished.');          
 

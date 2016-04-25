@@ -16,7 +16,7 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
               noperator=length(qoperatorList);               
               obj.matrixList=cell(1,noperator);
               for n=1:noperator
-                   obj.matrixList{1,n}=qoperatorList{n}.getMatrix();
+                   obj.matrixList{1,n}=full(qoperatorList{n}.getMatrix() );
               end
               
               obj.initial_state_type=initial_state_type;
@@ -26,13 +26,20 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
               else
                    obj.matrix_prefactor=-1i;
               end             
-              obj.result=0;
+              obj.result=[];
         end
           
         function state_out = calculate_evolution(obj, state_in, timelist)
+          % This method is used to handle the piecewise evolution case, i.e.,
+            % state_out(Nt)=exp(-i*H_N*t)*...*exp(-i*H_2*t)*exp(-i*H_1*t).
+            % In this case, the final state of the current step can not be set
+            % as the initial state of the next step. The evolution must
+            % arranged as like this:
+            % state_out(Nt)=exp(-i*H_N*t)*...*exp(-i*H_2t)*exp(-i*H_1*t).
                obj.timelist=timelist;
                ntime=length(timelist);
                dt=timelist(2)-timelist(1);
+               obj.result=[obj.result, state_in];
 
                noperator=length(obj.matrixList);
                core_mat_list=cell(1,noperator);
@@ -41,8 +48,7 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
                    core_mat_list{m}=expm(obj.matrix_prefactor(m)*dt*obj.matrixList{1,m});
                    evolution_mat_list{m}=1;
                end
-               state_out=cell(1,ntime);
-               state_out{1,1}=state_in;
+
                for n=2:ntime                   
                    for m=1:noperator                      
                      evolution_mat_list{1,m}=evolution_mat_list{1,m}*core_mat_list{1,m};
@@ -51,9 +57,9 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
                   for m=1:noperator
                        wave_vec=evolution_mat_list{1,m}*wave_vec;
                   end
-                  state_out{1,n}=wave_vec;
+                  state_out=wave_vec;
+                  obj.result=[obj.result,state_out];
                end
-                obj.result=state_out;
         end
                    
 
@@ -64,12 +70,13 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
               
               for n=1:len_obs
                   mat=obs_list{n}.getMatrix;
-                  if nargin>2
-                      left_vec=varargin{1}{1};
-                      mean_val(n,:)=cellfun(@(s) left_vec*mat*s, obj.result);
-                  else
-                      mean_val(n,:)=cellfun(@(s) s'*mat*s, obj.result);
-                  end
+%                   if nargin>2
+%                       left_vec=varargin{1}{1};
+%                       mean_val(n,:)=cellfun(@(s) left_vec*mat*s, obj.result);
+%                   else
+                    mat_on_state=mat*obj.result;
+                    mean_val(1,:)=diag( (obj.result)' *mat_on_state );
+%                   end
               end
           end
           

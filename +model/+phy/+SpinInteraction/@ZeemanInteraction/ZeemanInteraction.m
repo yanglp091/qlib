@@ -21,9 +21,19 @@ classdef ZeemanInteraction < model.phy.SpinInteraction.AbstractSpinInteraction
             obj.nbody=1;
         end
         
+        function skp=single_skp_term(obj)
+            spin=obj.iter.currentItem{1};
+            idx=obj.iter.currentIndex();
+            coeff=obj.calculate_coeff(spin);
+            
+            mat=coeff(1)*spin.sx + coeff(2)*spin.sy + coeff(3)*spin.sz;
+            skp=obj.kron_prod(1, idx, {mat});
+        end
+        
         function coeff=calculate_coeff(obj, spin)
             coeff=-(obj.parameter.B+spin.local_field) * spin.gamma;
         end
+        
         function mat=calculate_matrix(obj)
             spin=obj.iter.currentItem{1};
             coeff=obj.calculate_coeff(spin);

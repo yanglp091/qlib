@@ -54,10 +54,11 @@ classdef MatrixVectorEvolution < model.phy.Dynamics.AbstractEvolutionKernel
             % In this case, the final state of the current step can be set
             % as the initial state of the next step, e.e.,
             % state_out(2t)=exp(Lt)*state_out(t)=exp(Lt)*exp(Lt)*state_in.
+            obj.result=state_in;
             nInterval=length(time_list)-1;            
             state=state_in;
             for k=1:nInterval
-                fprintf('calculating evolution from t=%e to t=%e...\n', time_list(k), time_list(k+1));
+%                 fprintf('calculating evolution from t=%e to t=%e...\n', time_list(k), time_list(k+1));
                 dt=time_list(k+1)-time_list(k);
                 state_out=obj.evolve_step(state, dt);                
                 state=state_out;
@@ -94,6 +95,7 @@ classdef MatrixVectorEvolution < model.phy.Dynamics.AbstractEvolutionKernel
             
                ntime=length(timelist);
                dt=timelist(2)-timelist(1);
+               obj.result=[obj.result, state_in];
 
                noperator=length(obj.matrix_cell);
                core_mat_list=cell(1,noperator);
@@ -132,7 +134,7 @@ classdef MatrixVectorEvolution < model.phy.Dynamics.AbstractEvolutionKernel
                 for ii=1:len_obs
                     mat=obs_list{ii}.getMatrix();
                     mat_on_state=mat*obj.result;
-                    mean_val=sum(conj(obj.result).*mat_on_state);
+                    mean_val(1,:)=diag( (obj.result)' *mat_on_state );
                 end
             else
                 error('not supported.');
