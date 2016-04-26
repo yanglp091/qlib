@@ -44,7 +44,6 @@ classdef AbstractDynamics < handle
                 switch Space
                     case 'Liouville'
                         obj.state_in=state.getVector();
-                        obj.kernel.result=state.getVector();
                     case 'Hilbert'
                         obj.state_in=state.getMatrix();
                     otherwise
