@@ -49,8 +49,8 @@ classdef QOMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decohere
         end
         
         function L_single=gen_superoperator_single(obj,spin,kk)
-            Gamma_v=obj.decay_rate_list.Gamma_vertical_list(kk);% the vertical decay rate 
-            Gamma_p=obj.decay_rate_list.Gamma_parallel_list(kk);% the parallel decay rate
+            Gamma_v=2*pi*obj.decay_rate_list.Gamma_vertical_list(kk);% the vertical decay rate 
+            Gamma_p=2*pi*obj.decay_rate_list.Gamma_parallel_list(kk);% the parallel decay rate
 
             if Gamma_v >0 || Gamma_p > 0
 
