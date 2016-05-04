@@ -9,11 +9,16 @@ classdef AbstractSpinChainInteraction < model.phy.SpinInteraction.AbstractSpinIn
         function obj=AbstractSpinChainInteraction(para, iter)
             obj@model.phy.SpinInteraction.AbstractSpinInteraction(para, iter);
         end
-
-        function coeff=calculate_coeff(obj, spins)
-            spin1=spins{1}; 
-            spin_idx=str2double(spin1.name);
-            coeff=obj.parameter.interaction(spin_idx);
+        
+        function coeff=calculate_coeff(obj, spin_idx)
+            if length(spin_idx)==2
+                coeff=obj.parameter.interaction(spin_idx(1),spin_idx(2));
+            elseif length(spin_idx)==1
+                coeff=obj.parameter.interaction(spin_idx);
+            else
+                error('the number of the spins is larger than 2...');
+            end
+            
         end
         
         function mat=calculate_matrix(obj)

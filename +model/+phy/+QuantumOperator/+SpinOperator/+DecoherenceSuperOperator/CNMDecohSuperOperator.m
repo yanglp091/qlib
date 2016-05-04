@@ -1,4 +1,4 @@
-classdef CNMDecohSuperOperator < model.phy.QuantumOperator.MultiSpinSuperOperator.DecoherenceSuperOperator
+classdef CNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.DecoherenceSuperOperator.AbstractDecoherenceOperator
     %RNMDecohSuperOperator generate a superoperator to describe the decoherence of the multi-spin system.
     % The master equation is generated from a classical noise .
     % the total decoherence operator in the Liouville space is the summation of the decoherence operator 
@@ -21,7 +21,7 @@ classdef CNMDecohSuperOperator < model.phy.QuantumOperator.MultiSpinSuperOperato
     
     methods
         function obj=CNMDecohSuperOperator(spin_collection,decay_rate_list)
-            obj@model.phy.QuantumOperator.MultiSpinSuperOperator.DecoherenceSuperOperator(spin_collection);
+            obj@model.phy.QuantumOperator.SpinOperator.DecoherenceSuperOperator.AbstractDecoherenceOperator(spin_collection);
             obj.name='decoherence_super_operator';            
             obj.decay_rate_list=decay_rate_list;
         end
@@ -50,8 +50,8 @@ classdef CNMDecohSuperOperator < model.phy.QuantumOperator.MultiSpinSuperOperato
         end
         
         function L_single=gen_superoperator_single(obj,spin,kk)
-            Gamma_v=obj.decay_rate_list.Gamma_vertical_list(kk);% the vertical decay rate 
-            Gamma_p=obj.decay_rate_list.Gamma_parallel_list(kk);% the parallel decay rate
+            Gamma_v=2*pi*obj.decay_rate_list.Gamma_vertical_list(kk);% the vertical decay rate 
+            Gamma_p=2*pi*obj.decay_rate_list.Gamma_parallel_list(kk);% the parallel decay rate
 
             dim=spin.dim;
             if dim ~=2
@@ -65,12 +65,15 @@ classdef CNMDecohSuperOperator < model.phy.QuantumOperator.MultiSpinSuperOperato
                 spin_collection=obj.spin_collection;
                 % generate ladder operators
                 import model.phy.QuantumOperator.SpinOperator.Observable
-                Sm=Observable(spin_collection, 'sigma-', ['1.0 * mat([0,0;1,0])_' num2str(kk)]);
-                sigma_m=Sm.getMatrix;
-                Sp=Observable(spin_collection, 'sigam+', ['1.0 * mat([0,1;0,0])_' num2str(kk)]);
-                sigma_p=Sp.getMatrix;
-                Sz=Observable(spin_collection, 'sigmaz', ['1.0 * mat([1,0;0,-1])_'  num2str(kk)]);
-                sigma_z=Sz.getMatrix;
+                import model.phy.QuantumOperator.MatrixStrategy.FromKronProd
+                
+                strategy=FromKronProd();
+                Sm=Observable(spin_collection,strategy, 'sigma-', ['1.0 * mat([0,0;1,0])_' num2str(kk)]);
+                sigma_m=full(Sm.getMatrix);
+                Sp=Observable(spin_collection,strategy, 'sigam+', ['1.0 * mat([0,1;0,0])_' num2str(kk)]);
+                sigma_p=full(Sp.getMatrix);
+                Sz=Observable(spin_collection,strategy, 'sigmaz', ['1.0 * mat([1,0;0,-1])_'  num2str(kk)]);
+                sigma_z=full(Sz.getMatrix);
 
 
                 % generate supperoperator for the current spin

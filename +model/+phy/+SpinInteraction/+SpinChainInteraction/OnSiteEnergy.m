@@ -14,8 +14,8 @@ classdef OnSiteEnergy < model.phy.SpinInteraction.SpinChainInteraction.AbstractS
 
         function skp=single_skp_term(obj)
             spin=obj.iter.currentItem{1};
-            coeff=obj.calculate_coeff({spin});
             idx=obj.iter.currentIndex();
+            coeff=obj.calculate_coeff(idx);
             
             mat=spin.sz;
             skp=obj.kron_prod(coeff, idx, {mat});
@@ -23,7 +23,8 @@ classdef OnSiteEnergy < model.phy.SpinInteraction.SpinChainInteraction.AbstractS
         
         function mat=calculate_matrix(obj)
             spin=obj.iter.currentItem{1};
-            coeff=obj.calculate_coeff({spin});
+            idx=obj.iter.currentIndex();
+            coeff=obj.calculate_coeff(idx);
             mat=coeff*spin.sz;
         end
         

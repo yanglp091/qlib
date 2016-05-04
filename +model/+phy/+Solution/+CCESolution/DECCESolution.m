@@ -1,5 +1,5 @@
-classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
-    %ENSEMBLECCESOLUTION Summary of this class goes here
+classdef DECCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
+    %DECCESolution: We add decoherence on bath spins.
     %   EnsembleCCESolution needs the following input paramters:
     %   1. parameters.SpinCollectionStrategy
     %   2. parameters.InputFile
@@ -13,27 +13,24 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
     %   10. parameters.NTime
     %   11. parameters.TMax
     %   12. parameters.TimeList
-
+    %   13. parameters.decay_rate_list
    
     properties
     end
     
     methods
-        function obj=SingleSampleCCESolution(xml_file)
+        function obj=DECCESolution(xml_file)
             obj@model.phy.Solution.CCESolution.AbstractCCESolution(xml_file);
-        end
-        
-         function perform(obj)
-           Condition=model.phy.LabCondition.getCondition;              
-           Condition.setValue('magnetic_field',obj.parameters.MagneticField);  
-             
+        end                    
+           
+        function perform(obj)                              
            %  Generate Spin Collection FromSpinList and generate clusters 
            cluster_iterator=obj.generate_cluster_iterator();
            [evolution_para,cluster_para]=obj.pre_calculation(cluster_iterator);
            obj.calculate_total_coherence(evolution_para,cluster_para,cluster_iterator); 
            disp('Calculation of this solution finishes.');
         end
- %%       
+%%        
         function [evolution_parameter,cluster_parameter]=pre_calculation(obj,cluster_iterator)
            import model.phy.PhysicalObject.NV
 
@@ -41,8 +38,11 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
            evolution_parameter.timelist=obj.parameters.TimeList;
            evolution_parameter.npulse=obj.parameters.NPulse;
            evolution_parameter.is_secular=obj.parameters.IsSecularApproximation;
-           evolution_parameter.MagneticField=obj.parameters.MagneticField; 
-           evolution_parameter.strategy_name=obj.parameters.CCEStrategy;           
+           evolution_parameter.MagneticField=obj.parameters.MagneticField;
+           evolution_parameter.temperature=obj.parameters.temperature;
+           evolution_parameter.strategy_name=obj.parameters.CCEStrategy;
+           evolution_parameter.transverse_decay_rates=obj.parameters.transverse_decay_rates;
+           evolution_parameter.parallel_decay_rates=obj.parameters.parallel_decay_rates;           
                       
            center_spin_name=obj.parameters.SetCentralSpin.name;
            para_central_spin=obj.parameters.SetCentralSpin; 
@@ -51,21 +51,7 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
            
            cluster_parameter.center_spin=center_spin.espin;
            cluster_parameter.bath_spin_collection=cluster_iterator.spin_collection;
-           cluster_parameter.bath_spin_state=obj.generate_bath_spin_state(cluster_iterator);
         end
-        function bs_state=generate_bath_spin_state(obj,cluster_iterator)
-            seed=obj.parameters.seed;
-            nspin=cluster_iterator.spin_collection.getLength;
-            dim_list=cluster_iterator.spin_collection.getDimList;
-            rng(seed);rand_numbers=randi([1,100],1,nspin);
-            
-            bs_state=zeros(1,nspin);
-            for kk=1:nspin
-               dim=dim_list(kk); 
-               bs_state(1,kk)=mod(rand_numbers(kk),dim)+1; 
-            end
-        end
-        
 %%        
         function calculate_total_coherence(obj, evolu_para,clst_para,cluster_iter) 
 %          evolution parameters  
@@ -79,15 +65,14 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
 %         cluster parameters
 %           clst_para.bath_spin_collection:: a SpinCollection, including the  all bath spins
 %           clst_para.center_spin:: a Spin
-%           clst_para.bath_spin_state:: a list gives out the specific configuration of the bath
-%                                       spin state for SingleSampleCCE,
-%                                       e.g. [1,1,1,1,1,1,1,...,1] for the ground state.                                      
+%           clst_para.decay_rate_list:: a list gives out the decoherence rate for bath spins                                    
 
 
            ncluster=cluster_iter.getLength;
            ntime=length(evolu_para.timelist);           
            cluster_index_list=cluster_iter.index_list;
            MagneticField=evolu_para.MagneticField;
+%            temperature=evolu_para.temperature;
            
            CoherenceMatrix=zeros(ncluster,ntime);
            disp('calculate the cluster-coherence matrix ...');
@@ -98,20 +83,19 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
           % But this action is forbidden in parfor circulation. So I have to change the way to construct 
           % the AbstractClusterCoherence class. This is pretty ulgy, but I have to do this. 
 
-          parpool();
-          parfor n=1:ncluster 
-              disp(['calculating the ' num2str(n) 'th cluster coherence....']);
+           parpool();
+           parfor n=1:ncluster 
               Condition=model.phy.LabCondition.getCondition;              
               Condition.setValue('magnetic_field',MagneticField);
+%               Condition.setValue('temperature',temperature);
 
               %calculate cluster coherence              
               clst_index=cluster_index_list{n,1};
-              clst_coh=model.phy.Solution.CCESolution.CCECoherenceStrategy.SSCCEClusterCoherence(clst_index,clst_para);
+              clst_coh=model.phy.Solution.CCESolution.CCECoherenceStrategy.DECCEClusterCoherence(clst_index,clst_para);
               CoherenceMatrix(n,:)=clst_coh.calculate_cluster_coherence(evolu_para);
               delete(clst_coh);
-          end
-          delete(gcp('nocreate'));
-
+           end
+           delete(gcp('nocreate'));
            toc
            disp('calculation of the cluster-coherence matrix finished.');          
 
@@ -125,6 +109,7 @@ classdef SingleSampleCCESolution < model.phy.Solution.CCESolution.AbstractCCESol
                 clear CoherenceMatrix;
            end
          end
+
         
     end
     

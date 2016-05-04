@@ -85,11 +85,17 @@ classdef Spin < model.phy.PhysicalObject.PhysicalObject
         end
         
         function generalMat=mat(obj, m)
+            if nargin < 2
+               generalMat=speye(obj.dim)/obj.dim; 
+               return;
+            end
+            
             if length(m)==obj.dim
                 generalMat=m;
             else
                 error('dimension mismatch. matrix_dim=%d is assigned, but spin_dimension=%d is needed.', length(m), obj.dim);
             end
+            
         end
         
         function expM=expMat(obj, m)

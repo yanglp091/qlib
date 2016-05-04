@@ -24,7 +24,7 @@ classdef dipInteraction < model.phy.SpinInteraction.SpinChainInteraction.Abstrac
             spins=obj.iter.currentItem();
             idx=obj.iter.currentIndex();
             spin1=spins{1}; spin2=spins{2};
-            coeff=obj.calculate_coeff(spins);
+            coeff=obj.calculate_coeff(idx);
             
             mat1=spin1.sx; mat2=spin2.sx;
             xxTerm=obj.kron_prod(-coeff, idx, {mat1, mat2});
@@ -42,7 +42,8 @@ classdef dipInteraction < model.phy.SpinInteraction.SpinChainInteraction.Abstrac
         function mat=calculate_matrix(obj)
             spins=obj.iter.currentItem();
             spin1=spins{1}; spin2=spins{2};
-            coeff=obj.calculate_coeff(spins);
+            idx=obj.iter.currentIndex();
+            coeff=obj.calculate_coeff(idx);
             mat= -coeff*kron(spin1.sx,spin2.sx)...
                 -coeff*kron(spin1.sy,spin2.sy)...
                 +2*coeff*kron(spin1.sz,spin2.sz);
@@ -60,7 +61,7 @@ classdef dipInteraction < model.phy.SpinInteraction.SpinChainInteraction.Abstrac
                 spin1=spins{1}; spin2=spins{2};
                 index1=spin_idx(1); index2=spin_idx(2);
                 
-                coeff=obj.calculate_coeff(spins);
+                coeff=obj.calculate_coeff(spin_idx);
                 
                 dataCell{(ii-1)*2+1}={-coeff, obj.nbody, ...
                     index1, spin1.dim, reshape(spin1.sx, [], 1), ...
