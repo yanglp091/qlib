@@ -66,8 +66,8 @@ classdef GFNECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceSt
             
             import model.phy.QuantumOperator.SpinOperator.DecoherenceSuperOperator.GFNMDecohSuperOperator
 
-            corr_time=obj.correlation_time;
-            L_decay=GFNMDecohSuperOperator(bath_cluster,corr_time);
+            para.CorrelationTime=obj.correlation_time;
+            L_decay=GFNMDecohSuperOperator(bath_cluster,para);
             L_decay_mat=L_decay.getMatrix;
             noperator=length(hami_list);
             if mod(noperator,2)==1

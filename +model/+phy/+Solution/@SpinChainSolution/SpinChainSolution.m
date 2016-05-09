@@ -81,7 +81,7 @@ classdef SpinChainSolution < model.phy.Solution.AbstractSolution
             [hamiltonian, liouvillian] = obj.GetHamiltonianLiouvillian(spin_collection,matrix_strategy);
             initial_state              = obj.GetInitialState(spin_collection,matrix_strategy);
             observables                = obj.GetObservables(spin_collection,matrix_strategy);
-            obj.StoreKeyVariables(spin_collection, hamiltonian, liouvillian, initial_state)
+            obj.StoreKeyVariables(spin_collection, hamiltonian, liouvillian, initial_state);
                                     
             dynamics                   = obj.StateEvolve(hamiltonian, liouvillian, initial_state);
             mean_values                = obj.GetMeanValues(dynamics, observables);
