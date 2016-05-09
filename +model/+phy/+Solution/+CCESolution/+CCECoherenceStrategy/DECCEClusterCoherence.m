@@ -3,7 +3,8 @@ classdef DECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStra
                 %calculate the coherence of single cluster for ensemble CCE 
     properties
       coherence_tilde
-      decay_rate_list
+      vertical_decay_rates
+      parallel_decay_rates
     end
     
     methods
@@ -20,8 +21,8 @@ classdef DECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStra
             is_secular=evolution_para.is_secular;
             obj.timelist=evolution_para.timelist;
             
-            obj.decay_rate_list.transverse_decay_rates=evolution_para.transverse_decay_rates;
-            obj.decay_rate_list.parallel_decay_rates=evolution_para.parallel_decay_rates;
+            obj.vertical_decay_rates=evolution_para.vertical_decay_rates;
+            obj.parallel_decay_rates=evolution_para.parallel_decay_rates;
             
             %generate the spin_collection for this cluster including the central spin
             obj.spin_collection= model.phy.SpinCollection.SpinCollection();
@@ -67,13 +68,22 @@ classdef DECCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStra
             % first get the matrix of the density matrix rho, the vec_rho=rho(:);
             import model.phy.QuantumOperator.SpinOperator.DecoherenceSuperOperator.CNMDecohSuperOperator
 
+            %setting the parameters for decoherence supper operator
             nspin=bath_cluster.getLength;
-            transverse_decay_rates=obj.decay_rate_list.transverse_decay_rates;
-            parallel_decay_rates=obj.decay_rate_list.parallel_decay_rates;
-            decay_list.Gamma_vertical_list=transverse_decay_rates*ones(1,nspin);
-            decay_list.Gamma_parallel_list=parallel_decay_rates*ones(1,nspin);
+            para.AddVerticalDecay=0;
+            para.AddParallelDecay=0;
+            vertical_decay_rate=obj.vertical_decay_rates;            
+            if vertical_decay_rate>0
+                para.AddVerticalDecay=1;
+                para.VerticalDecayRateList=vertical_decay_rate*ones(1,nspin);
+            end            
+            parallel_decay_rate=obj.parallel_decay_rates;
+            if parallel_decay_rate>0
+                para.AddParallelDecay=1;
+                para.ParallelDecayRateList=parallel_decay_rate*ones(1,nspin);
+            end
 
-            L_decay=CNMDecohSuperOperator(bath_cluster,decay_list);
+            L_decay=CNMDecohSuperOperator(bath_cluster,para);
             L_decay_mat=L_decay.getMatrix;
             noperator=length(hami_list);
             if mod(noperator,2)==1

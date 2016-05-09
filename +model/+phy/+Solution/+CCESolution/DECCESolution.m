@@ -41,7 +41,7 @@ classdef DECCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
            evolution_parameter.MagneticField=obj.parameters.MagneticField;
            evolution_parameter.temperature=obj.parameters.temperature;
            evolution_parameter.strategy_name=obj.parameters.CCEStrategy;
-           evolution_parameter.transverse_decay_rates=obj.parameters.transverse_decay_rates;
+           evolution_parameter.vertical_decay_rates=obj.parameters.vertical_decay_rates;
            evolution_parameter.parallel_decay_rates=obj.parameters.parallel_decay_rates;           
                       
            center_spin_name=obj.parameters.SetCentralSpin.name;
@@ -72,7 +72,7 @@ classdef DECCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
            ntime=length(evolu_para.timelist);           
            cluster_index_list=cluster_iter.index_list;
            MagneticField=evolu_para.MagneticField;
-%            temperature=evolu_para.temperature;
+           temperature=evolu_para.temperature;
            
            CoherenceMatrix=zeros(ncluster,ntime);
            disp('calculate the cluster-coherence matrix ...');
@@ -87,7 +87,7 @@ classdef DECCESolution < model.phy.Solution.CCESolution.AbstractCCESolution
            parfor n=1:ncluster 
               Condition=model.phy.LabCondition.getCondition;              
               Condition.setValue('magnetic_field',MagneticField);
-%               Condition.setValue('temperature',temperature);
+              Condition.setValue('temperature',temperature);
 
               %calculate cluster coherence              
               clst_index=cluster_index_list{n,1};

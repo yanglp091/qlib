@@ -6,8 +6,8 @@ function get_CCE_special_parameter(obj,p)
             obj.parameters.seed=p.get_parameter('Dynamics','Seed');
         case 'DissipativeEnsembleCCE'
             obj.parameters.temperature=p.get_parameter('Condition', 'Temperature');
-            obj.parameters.transverse_decay_rates=p.get_parameter('Dynamics','TrantransverseDecayRate');
-            obj.parameters.parallel_decay_rates=p.get_parameter('Dynamics','ParallelDecayRatetype');
+            obj.parameters.vertical_decay_rates=p.get_parameter('Dynamics','VerticalDecayRate');
+            obj.parameters.parallel_decay_rates=p.get_parameter('Dynamics','ParallelDecayRate');
         case 'GFNCCESolution'
             obj.parameters.correlation_time=p.get_parameter('Dynamics','CorrelationTime');
         otherwise
