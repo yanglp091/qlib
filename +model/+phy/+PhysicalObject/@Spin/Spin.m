@@ -15,12 +15,12 @@ classdef Spin < model.phy.PhysicalObject.PhysicalObject
         S
         S2
         
-        sx_mat=[]
-        sy_mat=[]
-        sz_mat=[]
-        self_hamiltonian
-        eigen_vect
-        eigen_val
+        sx=[];
+        sy=[];
+        sz=[];
+        self_hamiltonian;
+        eigen_vect;
+        eigen_val;
     end
     
     methods
@@ -35,9 +35,10 @@ classdef Spin < model.phy.PhysicalObject.PhysicalObject
             obj.S= 0.5*(obj.dim-1);
             obj.S2= obj.S*(obj.S+1);
             
-            obj.sx_mat=Sx(obj.dim);
-            obj.sy_mat=Sy(obj.dim);
-            obj.sz_mat=Sz(obj.dim);
+            %generate the matrix of the angular operators
+            obj.sx=Sx(obj.dim);
+            obj.sy=Sy(obj.dim);
+            obj.sz=Sz(obj.dim);
         end
         
         function set_spin(obj,para)
@@ -52,31 +53,27 @@ classdef Spin < model.phy.PhysicalObject.PhysicalObject
             [obj.eigen_vect, obj.eigen_val]=eig(full(obj.self_hamiltonian.getMatrix));
         end
         
-        function xmat=sx(obj)
-%             if isempty(obj.sx_mat)
-%                 obj.sx_mat=Sx(obj.dim);
-%                 xmat=obj.sx_mat;
-%             else
-                xmat=obj.sx_mat;
-%             end
+        function xmat=sqx(obj)% the maxtix of Sx in the qAxis
+            axis_x=obj.qAxis(1,:);    
+            xmat=axis_x(1)*obj.sx+axis_x(2)*obj.sy+axis_x(3)*obj.sz;
         end
         
-        function ymat=sy(obj)
-%             if isempty(obj.sy_mat)
-%                 obj.sy_mat=Sy(obj.dim);
-%                 ymat=obj.sy_mat;
-%             else
-                ymat=obj.sy_mat;
-%             end
+        function ymat=sqy(obj)% the maxtix of Sy in the qAxis
+            axis_y=obj.qAxis(2,:);    
+            ymat=axis_y(1)*obj.sx+axis_y(2)*obj.sy+axis_y(3)*obj.sz;
         end
         
-        function zmat=sz(obj)
-%             if isempty(obj.sz_mat)
-%                 obj.sz_mat=Sz(obj.dim);
-%                 zmat=obj.sz_mat;
-%             else
-                zmat=obj.sz_mat;
-%             end
+        function zmat=sqz(obj)% the maxtix of Sz in the qAxis
+            axis_z=obj.qAxis(3,:);    
+            zmat=axis_z(1)*obj.sx+axis_z(2)*obj.sy+axis_z(3)*obj.sz;
+        end
+        
+        function zmat=sqp(obj)% the maxtix of S_{+} in the qAxis   
+            zmat=obj.sqx+1i*obj.sqy;
+        end
+        
+        function zmat=sqm(obj)% the maxtix of S_{-} in the qAxis   
+            zmat=obj.sqx-1i*obj.sqy;
         end
         
         function projMat=p(obj, k)

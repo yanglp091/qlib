@@ -32,23 +32,23 @@ classdef LocalVerticalDecayInteraction < model.phy.SpinInteraction.AbstractSpinI
             
             idx=obj.iter.currentIndex();
             cursor=obj.iter.getCursor();            
-            sigmap=[0,1;0,0];sigmam=[0,0;1,0];
+            sigmap=spin.sqp;sigmam=spin.sqm;
 
            [Gamma_v,factor1,factor2]=obj.calculate_coeff(cursor);% the cursor is the same as the index
             
-            mat=Gamma_v*factor1*kron(sigmap',sigmam); 
+            mat=Gamma_v*factor1*kron(sigmap.',sigmam); 
             Term1=obj.supper_kron_prod(1, idx, {mat});
             
-            mat=-0.5*Gamma_v*factor1*kron( (sigmap*sigmam)',speye(dim)); 
+            mat=-0.5*Gamma_v*factor1*kron( (sigmap*sigmam).',speye(dim)); 
             Term2=obj.supper_kron_prod(1, idx, {mat});
             
             mat=-0.5*Gamma_v*factor1*kron(speye(dim), sigmap*sigmam); 
             Term3=obj.supper_kron_prod(1, idx, {mat});
             
-            mat=Gamma_v*factor2*kron(sigmam',sigmap);
+            mat=Gamma_v*factor2*kron(sigmam.',sigmap);
             Term4=obj.supper_kron_prod(1, idx, {mat});
             
-            mat=-0.5*Gamma_v*factor2*kron( (sigmam*sigmap)',speye(dim)); 
+            mat=-0.5*Gamma_v*factor2*kron( (sigmam*sigmap).',speye(dim)); 
             Term5=obj.supper_kron_prod(1, idx, {mat});
             
             mat=-0.5*Gamma_v*factor2*kron(speye(dim), sigmam*sigmap);
@@ -86,16 +86,14 @@ classdef LocalVerticalDecayInteraction < model.phy.SpinInteraction.AbstractSpinI
                 import model.phy.QuantumOperator.MatrixStrategy.FromKronProd
                 
                 strategy=FromKronProd();
-                Sm=Observable(sc,strategy, 'sigma-', ['1.0 * mat([0,0;1,0])_' num2str(idx)]);
+                Sm=Observable(sc,strategy, 'sigma-', ['1.0 * sqm_' num2str(idx)]);
                 sigma_m=full(Sm.getMatrix);
-                Sp=Observable(sc,strategy, 'sigam+', ['1.0 * mat([0,1;0,0])_' num2str(idx)]);
+                Sp=Observable(sc,strategy, 'sigam+', ['1.0 * sqp_' num2str(idx)]);
                 sigma_p=full(Sp.getMatrix);
           
 
-                L_single=0.5*Gamma_v*factor1*(2*kron(sigma_p',sigma_m)-kron(speye(dim_tot),sigma_p*sigma_m)-kron((sigma_p*sigma_m)',speye(dim_tot)))...
-                    +0.5*Gamma_v*factor2*(2*kron(sigma_m',sigma_p)-kron(speye(dim_tot),sigma_m*sigma_p)-kron((sigma_m*sigma_p)',speye(dim_tot)));
-                %In the kron product, we have used the Hermitian conjugation to replace the transpose operation. because all the matrix is real
-
+                L_single=0.5*Gamma_v*factor1*(2*kron(sigma_p.',sigma_m)-kron(speye(dim_tot),sigma_p*sigma_m)-kron((sigma_p*sigma_m).',speye(dim_tot)))...
+                    +0.5*Gamma_v*factor2*(2*kron(sigma_m.',sigma_p)-kron(speye(dim_tot),sigma_m*sigma_p)-kron((sigma_m*sigma_p).',speye(dim_tot)));
             else
                L_single=0;
             end

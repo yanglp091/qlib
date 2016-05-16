@@ -29,7 +29,7 @@ classdef GFNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decoher
    
     properties
         parameter
-        
+        axis
     end
     
     methods
@@ -41,6 +41,7 @@ classdef GFNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decoher
             else
                 obj.matrix_strategy = [];
             end
+
             obj.name='decoherence_super_operator'; 
             obj.generate_interaction_list;
         end
@@ -63,7 +64,6 @@ classdef GFNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decoher
                 decay_rate=gradient_field*gradient_field'*(gammaj^2)*correlation_time/pi;%
                 para.DecayRateList{kk}=decay_rate;
             end
-            
             local_decay_term=model.phy.SpinInteraction.DecoherenceInteraction.LocalParallelDecayInteraction(para,iter);
             obj.addInteraction(local_decay_term);
             
@@ -85,6 +85,7 @@ classdef GFNMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decoher
                 decay_rate=g_field1*g_field2'*gamma1*gamma2*correlation_time/pi/2;% the parallel decay rate
                 para.DecayRateList{kk}=decay_rate;                
             end
+
             cross_decay_term=model.phy.SpinInteraction.DecoherenceInteraction.CrossParallelDecayInteraction(para,iter);
             obj.addInteraction(cross_decay_term);
         end

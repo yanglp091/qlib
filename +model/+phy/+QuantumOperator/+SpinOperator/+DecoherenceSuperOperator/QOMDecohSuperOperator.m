@@ -31,6 +31,7 @@ classdef QOMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decohere
             else
                 obj.matrix_strategy = [];
             end
+            
             obj.name='decoherence_super_operator'; 
             obj.generate_interaction_list;
         end
@@ -68,7 +69,7 @@ classdef QOMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decohere
                 para.FactorList1{kk}=factor+1;
                 para.FactorList2{kk}=factor;
             end
-            
+
             local_decay_term=model.phy.SpinInteraction.DecoherenceInteraction.LocalVerticalDecayInteraction(para,iter);
             obj.addInteraction(local_decay_term);
             
@@ -82,7 +83,7 @@ classdef QOMDecohSuperOperator < model.phy.QuantumOperator.SpinOperator.Decohere
             for kk=1:nItem
                 para.DecayRateList{kk}=decay_rate(kk);
             end
-            
+
             local_decay_term=model.phy.SpinInteraction.DecoherenceInteraction.LocalParallelDecayInteraction(para,iter);
             obj.addInteraction(local_decay_term);
             

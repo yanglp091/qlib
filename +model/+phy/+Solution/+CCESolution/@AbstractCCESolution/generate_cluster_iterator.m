@@ -42,7 +42,7 @@ function cluster_iterator=generate_cluster_iterator(obj)
            toc
     end
      
-
+    set_spin_qAxis(obj,cluster_iterator.spin_collection);
     set_gradient_field(obj,cluster_iterator.spin_collection);%cluster_iterator.spin_collection=
     reset_gyromagnetic_ratio(obj,cluster_iterator.spin_collection);
     obj.keyVariables('spin_collection')=cluster_iterator.spin_collection;
@@ -77,5 +77,25 @@ function reset_gyromagnetic_ratio(obj,spin_collection)
     for kk=1:nspin
         spin=spin_collection.spin_list{kk};
         spin.gamma=gamma;
+    end
+end
+
+function set_spin_qAxis(obj,spin_collection)
+    magnetic_field=obj.parameters.MagneticField;
+    mf_len=norm(magnetic_field);
+    mf_z=[0,0,1]*magnetic_field';
+    if mf_len>mf_z
+        vec_z=magnetic_field/mf_len;
+        vec_y=cross([0,0,1],vec_z);vec_y=vec_y/norm(vec_y);
+        vec_x=cross(vec_y,vec_z);vec_x=vec_x/norm(vec_x);
+        Axis=[vec_x;vec_y;vec_z];
+    else
+        Axis=eye(3);
+    end
+    
+    nspin=spin_collection.getLength;
+    for kk=1:nspin
+        spin=spin_collection.spin_list{kk};
+        spin.qAxis=Axis;
     end
 end
