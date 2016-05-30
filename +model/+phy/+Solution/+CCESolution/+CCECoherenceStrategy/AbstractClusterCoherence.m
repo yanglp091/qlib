@@ -15,13 +15,16 @@ classdef AbstractClusterCoherence < handle
       preoperator_factor
       npulse
       timelist
+      
+      principle_axis
     end
     
     methods
         function obj=AbstractClusterCoherence(cluster_spin_index,cluster_parameters)   
             % The input "bath_spins" is a SpinCollection, including the  all bath spins. 
             % The input "cspin" is a Spin 
-            % The input "cluster_spin_index" is the index of  bath spin of this cluster in bath_spins            
+            % The input "cluster_spin_index" is the index of  bath spin of this cluster in bath_spins  
+            obj.principle_axis=eye(3);
             if nargin>0
                 obj.generate(cluster_spin_index,cluster_parameters);
             end
@@ -219,6 +222,40 @@ classdef AbstractClusterCoherence < handle
                 end
             end
             
+        end
+        
+        function lf2add=calculate_dipolar_field(obj,spin1,spin2,state_idx)
+            % this function is used to calculate the effective field of
+            % spin1 induced by the dipole-dipole interaction between spin1
+            % and spin2 when spin2 is in state os_idx .
+            coeff=obj.calculate_dip_coeff(spin1,spin2);
+            
+            eig_vec=spin2.eigen_vect(:,state_idx);
+            sx_val=real(eig_vec'*spin2.sx*eig_vec);
+            sy_val=real(eig_vec'*spin2.sy*eig_vec);
+            sz_val=real(eig_vec'*spin2.sz*eig_vec);
+            s_vec=[sx_val,sy_val,sz_val];
+
+            lf2add=-s_vec*coeff/spin1.gamma;
+        end
+        function coeff=calculate_dip_coeff(obj,spin1,spin2)        
+            coord1=spin1.coordinate; gamma1=spin1.gamma;
+            coord2=spin2.coordinate; gamma2=spin2.gamma;
+
+            vect=coord2-coord1;
+            distance=norm(vect);
+            ort=vect/distance;
+
+            % dipolar interaction strength
+            A=hbar*mu0*gamma1*gamma2/(4*pi*(distance*1e-10)^3);
+
+            % the dipolar coupling matrix
+            coeff=A*...
+                [1-3*ort(1)*ort(1)   -3*ort(1)*ort(2)   -3*ort(1)*ort(3);
+                  -3*ort(2)*ort(1)  1-3*ort(2)*ort(2)   -3*ort(2)*ort(3);
+                  -3*ort(3)*ort(1)   -3*ort(3)*ort(2)  1-3*ort(3)*ort(3)];
+          coeff=obj.principle_axis*coeff*(obj.principle_axis');
+
         end
     end
     

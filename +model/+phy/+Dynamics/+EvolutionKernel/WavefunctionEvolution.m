@@ -70,13 +70,15 @@ classdef WavefunctionEvolution < model.phy.Dynamics.AbstractEvolutionKernel
               
               for n=1:len_obs
                   mat=obs_list{n}.getMatrix;
-%                   if nargin>2
-%                       left_vec=varargin{1}{1};
-%                       mean_val(n,:)=cellfun(@(s) left_vec*mat*s, obj.result);
-%                   else
-                    mat_on_state=mat*obj.result;
+                  mat_on_state=mat*obj.result;
+                  if nargin>2 
+                      % for single sample CCE, we need to calcualte <J|exp(-1i*H^{-}t)*exp(-1i*H^{+}t)|J> .
+                      left_vec=varargin{1}{1};
+                      mean_val(n,:)=left_vec*mat_on_state;
+                  else
+
                     mean_val(1,:)=diag( (obj.result)' *mat_on_state );
-%                   end
+                  end
               end
           end
           

@@ -97,7 +97,7 @@ classdef SpinCollection < handle
                 spin=obj.spin_list{k};
                 spin.selfHamiltonian();
             end            
-            self_int=model.phy.SpinInteraction.InteractionString(obj, strCell);
+            self_int=model.phy.SpinInteraction.AdditionalSpinInteraction.InteractionString(obj, strCell);
             selfOP.addInteraction(self_int);
             selfOP.generate_matrix();
         end

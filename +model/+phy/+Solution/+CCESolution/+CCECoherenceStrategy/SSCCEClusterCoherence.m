@@ -68,53 +68,17 @@ classdef SSCCEClusterCoherence < model.phy.Solution.CCESolution.CCECoherenceStra
                target_spin=obj.cluster_bath_spin{kk};
                for ii=1:length(ex_cluster_index)
                    os_idx=ex_cluster_index(ii);% the index of the spin outside of the cluster
-                   outside_spin=obj.bath_spin_collection.spin_list{os_idx};                   
-                   local_field2add=obj.calculate_dipolar_field(target_spin,outside_spin,os_idx);
+                   outside_spin=obj.bath_spin_collection.spin_list{os_idx};     
+                   state_idx=obj.bath_spin_state(os_idx);
+                   local_field2add=obj.calculate_dipolar_field(target_spin,outside_spin,state_idx);% this function is defined in AbstractClusterCoherence
                    local_field=local_field+local_field2add;
                end
                obj.cluster_bath_spin{kk}.local_field=local_field;
             end
             
         end
-        function lf2add=calculate_dipolar_field(obj,spin1,spin2,os_idx)
-%             pair_sc= model.phy.SpinCollection.SpinCollection();
-%             pair_sc.spin_source=model.phy.SpinCollection.Strategy.FromSpinList([{spin1},{spin2}]);
-%             pair_sc.generate();
-            
-%             dip_interaction=model.phy.SpinInteraction.DipolarInteraction(pair_sc);
-%             coeff=dip_interaction.calculate_coeff([{tar_spin},{out_spin}]);
-            coeff=calculate_dip_coeff(spin1,spin2);
-            
-            state_idx=obj.bath_spin_state(os_idx);
-            eig_vec=spin2.eigen_vect(:,state_idx);
-            sx_val=eig_vec'*spin2.sx*eig_vec;
-            sy_val=eig_vec'*spin2.sy*eig_vec;
-            sz_val=eig_vec'*spin2.sz*eig_vec;
-            s_vec=[sx_val,sy_val,sz_val];
-
-            lf2add=-s_vec*coeff/spin1.gamma;
-        end
                        
     end
-    
-end
-
-function coeff=calculate_dip_coeff(spin1,spin2)        
-    coord1=spin1.coordinate; gamma1=spin1.gamma;
-    coord2=spin2.coordinate; gamma2=spin2.gamma;
-
-    vect=coord2-coord1;
-    distance=norm(vect);
-    ort=vect/distance;
-
-    % dipolar interaction strength
-    A=hbar*mu0*gamma1*gamma2/(4*pi*(distance*1e-10)^3);
-
-    % the dipolar coupling matrix
-    coeff=A*...
-        [1-3*ort(1)*ort(1)   -3*ort(1)*ort(2)   -3*ort(1)*ort(3);
-          -3*ort(2)*ort(1)  1-3*ort(2)*ort(2)   -3*ort(2)*ort(3);
-          -3*ort(3)*ort(1)   -3*ort(3)*ort(2)  1-3*ort(3)*ort(3)];
     
 end
 

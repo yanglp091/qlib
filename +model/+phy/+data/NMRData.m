@@ -12,6 +12,9 @@
         function [dim, gamma] = get_spin(name)
 
             switch char(name)
+                case 'Fe2S2'% the Fe2S2 cluster
+                    dim=2;
+                    gamma=-1.760859708e11; 
                 case 'NVespin'
                     dim=3;
                     gamma=-1.760859708e11; 
