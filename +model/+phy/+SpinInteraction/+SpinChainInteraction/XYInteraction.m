@@ -1,14 +1,60 @@
 classdef XYInteraction < model.phy.SpinInteraction.SpinChainInteraction.AbstractSpinChainInteraction
     %XYINTERACTION Summary of this class goes here
-    %   Detailed explanation goes here
+    % The input parameter can contain the following iterms:
+    % para.interaction:: To input the interaction strength matrix.
+    % para.AddChain= 0 or 1:: To generate a chain iterator
+    % para.AddRing=0 or 1:: To generate a ring iterator
+    % para.AddIndexList=0 or 1:: To generate a iterator with the given index_list.
     
     properties
     end
     
     methods
         function obj=XYInteraction(spin_collection, para)
-            iter=model.phy.SpinCollection.Iterator.ChainNeighbouringIterator(spin_collection);
-            obj@model.phy.SpinInteraction.SpinChainInteraction.AbstractSpinChainInteraction(para, iter);
+            nspin=spin_collection.getLength;
+            has_iter=0;
+            
+            try
+                parameter.interaction=para.interaction;
+            catch
+                parameter.interaction=ones(nspin);
+            end
+            
+            try
+                AddChain=para.AddChain;
+            catch
+                AddChain=0;
+            end
+            if AddChain
+                iter=model.phy.SpinCollection.Iterator.ChainNeighbouringIterator(spin_collection);
+                has_iter=1;
+            end
+            
+            try
+                AddRing=para.AddRing;
+            catch
+                AddRing=0;
+            end
+            if AddRing
+                iter=model.phy.SpinCollection.Iterator.ChainNeighbouringIterator(spin_collection,'ring_index');
+                has_iter=1;
+            end
+            try 
+                AddIndexList=para.AddIndexList;
+            catch
+                AddIndexList=0;
+            end
+            if AddIndexList
+                iter=model.phy.SpinCollection.Iterator.ChainNeighbouringIterator(spin_collection);
+                iter.index_list=para.IndexList;
+                has_iter=1;
+            end
+            
+            if ~has_iter
+                iter=model.phy.SpinCollection.Iterator.ChainNeighbouringIterator(spin_collection);
+            end
+                
+            obj@model.phy.SpinInteraction.SpinChainInteraction.AbstractSpinChainInteraction(parameter, iter);
             obj.nbody=2;
         end
         function skp=single_skp_term(obj)

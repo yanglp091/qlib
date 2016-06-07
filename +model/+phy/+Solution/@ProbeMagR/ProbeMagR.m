@@ -1,4 +1,4 @@
-classdef MagRSolution < model.phy.Solution.AbstractSolution
+classdef ProbeMagR < model.phy.Solution.AbstractSolution
     %MAGRSOLUTION Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -6,7 +6,7 @@ classdef MagRSolution < model.phy.Solution.AbstractSolution
     end
     
     methods
-        function obj=MagRSolution(xml_file)
+        function obj=ProbeMagR(xml_file)
             obj@model.phy.Solution.AbstractSolution(xml_file);
         end
         
@@ -14,9 +14,9 @@ classdef MagRSolution < model.phy.Solution.AbstractSolution
             get_parameters@model.phy.Solution.AbstractSolution(obj, p);
             
             obj.parameters.MagneticField=p.get_parameter('Condition', 'MagneticField');
+            Condition=model.phy.LabCondition.getCondition;              
+            Condition.setValue('magnetic_field',obj.parameters.MagneticField);
             
-            obj.parameters.SpinCollectionStrategy=p.get_parameter('SpinCollection', 'Source');
-            obj.parameters.InputFile=p.get_parameter('SpinCollection', 'FileName');
             obj.BathSpinParameters(p);
             obj.CentralSpinParameters(p);
             
@@ -39,30 +39,61 @@ classdef MagRSolution < model.phy.Solution.AbstractSolution
         end
                
         function perform(obj)
-            Condition=model.phy.LabCondition.getCondition;              
-            Condition.setValue('magnetic_field',obj.parameters.MagneticField);
+            nseed=obj.parameters.nseed;
+            spin_list_tot=obj.keyVariables('SpinListTotal');
+            spin_collection_cell=cell(1,nseed);
             
-           [evolution_para,cluster_para,clst_index]=obj.pre_calculation();
-           
-           clst_coh=model.phy.Solution.CCESolution.CCECoherenceStrategy.UnCorrelatedClusterCoherence(clst_index,cluster_para);
-           coh=clst_coh.calculate_cluster_coherence(evolution_para);
-           obj.keyVariables('coherence')=coh;
-           obj.keyVariables('timelist')=obj.parameters.TimeList;
+            time=obj.parameters.TimeList;
+            ntime=length(time);
+            coherence_matrix=zeros(nseed,ntime);
+            dip_info=cell(nseed,1);
+            pos=1;
+            for kk=1:nseed
+               idx=pos:1:pos+3;
+               spin_list=spin_list_tot(idx);
+               [evolution_para,cluster_para,clst_index,spin_collection]=obj.pre_calculation(spin_list);
+               spin_collection_cell{kk}=spin_collection;               
+               clst_coh=model.phy.Solution.CCESolution.CCECoherenceStrategy.UnCorrelatedClusterCoherence(clst_index,cluster_para);
+               coh=clst_coh.calculate_cluster_coherence(evolution_para);
+               coherence_matrix(kk,:)=coh;
+               
+               [obs_tf,obs_pro]=obj.get_cluster_transition_spectrum(clst_coh,evolution_para.IntPara);
+               dip_info{kk}.frequency=obs_tf;
+               dip_info{kk}.amplitude=obs_pro;
+               pos=pos+4;
+            end
+            if nseed>1
+               coherence=sum(coherence_matrix)/nseed;
+            else
+               coherence=coherence_matrix;
+            end
+           obj.keyVariables('coherence_matrix')=coherence_matrix;
+           obj.keyVariables('coherence')=coherence;
+           obj.keyVariables('timelist')=time;
+           obj.keyVariables('spin_collection_cell')=spin_collection_cell;
+          
            disp('Calculation of this solution finishes.');
-           
+           obj.keyVariables('dip_info')=dip_info;
         end
         
-       function [evolution_parameter,cluster_parameter,clst_index]=pre_calculation(obj)
+       function [evolution_parameter,cluster_parameter,clst_index,spin_collection]=pre_calculation(obj,spin_list)
            import model.phy.PhysicalObject.NV
-
+           import model.phy.SpinCollection.SpinCollection
+           import model.phy.SpinCollection.Strategy.FromSpinList
+           
+           spin_collection=SpinCollection(FromSpinList(spin_list));
            evolution_parameter.center_spin_states=obj.parameters.SetCentralSpin.CentralSpinStates;
            evolution_parameter.timelist=obj.parameters.TimeList;
            evolution_parameter.npulse=obj.parameters.NPulse;
            evolution_parameter.is_secular=obj.parameters.IsSecularApproximation;
-           
-           evolution_parameter.AddContact=obj.parameters.AddContact;
-           evolution_parameter.contactInt=obj.parameters.contactInt;
-           evolution_parameter.AddDipInt=obj.parameters.AddDipInt;
+
+           IntPara.AddDipInt=obj.parameters.AddDipInt;          
+           IntPara.AddContact=obj.parameters.AddContact;
+           IntPara.interaction=obj.parameters.contactInt;
+           IntPara.AddIndexList=1;
+           idx=cell(6,1);idx{1}=[1,2];idx{2}=[2,3];idx{3}=[3,4];idx{4}=[4,1];idx{5}=[1,3];idx{6}=[2,4];
+           IntPara.IndexList=idx;
+           evolution_parameter.IntPara=IntPara;
            
            
 
@@ -76,8 +107,8 @@ classdef MagRSolution < model.phy.Solution.AbstractSolution
            obj.keyVariables('center_spin')=center_spin;
            
            cluster_parameter.center_spin=center_spin.espin;
-           cluster_parameter.bath_spin_collection=obj.keyVariables('spin_collection');
-           nspin=obj.keyVariables('spin_collection').getLength;
+           cluster_parameter.bath_spin_collection=spin_collection;
+           nspin=spin_collection.getLength;
            clst_index=1:nspin;
         end
     end

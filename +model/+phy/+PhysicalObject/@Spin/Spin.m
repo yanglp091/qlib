@@ -50,7 +50,15 @@ classdef Spin < model.phy.PhysicalObject.PhysicalObject
                 end
             end
             obj.self_hamiltonian=obj.selfHamiltonian();
-            [obj.eigen_vect, obj.eigen_val]=eig(full(obj.self_hamiltonian.getMatrix));
+            [V, D]=eig(full(obj.self_hamiltonian.getMatrix));
+            
+            d_vec=diag(D);
+            [~,idx]=sort(d_vec);
+            D_sorted=diag(d_vec(idx));
+            V_sorted=V(:,idx');
+                    
+            obj.eigen_val=D_sorted;            
+            obj.eigen_vect=V_sorted;
         end
         
         function xmat=sqx(obj)% the maxtix of Sx in the qAxis

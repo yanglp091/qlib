@@ -230,13 +230,18 @@ classdef AbstractClusterCoherence < handle
             % and spin2 when spin2 is in state os_idx .
             coeff=obj.calculate_dip_coeff(spin1,spin2);
             
-            eig_vec=spin2.eigen_vect(:,state_idx);
-            sx_val=real(eig_vec'*spin2.sx*eig_vec);
-            sy_val=real(eig_vec'*spin2.sy*eig_vec);
-            sz_val=real(eig_vec'*spin2.sz*eig_vec);
+            eig_vec=spin1.eigen_vect(:,state_idx);
+            sx_val=real(eig_vec'*spin1.sx*eig_vec);
+            sy_val=real(eig_vec'*spin1.sy*eig_vec);
+            sz_val=real(eig_vec'*spin1.sz*eig_vec);
             s_vec=[sx_val,sy_val,sz_val];
+            s_norm=norm(s_vec);
+            if s_norm>1e-3
+                s_vec=s_vec/s_norm;
+            end
+            s_val=spin1.S;
 
-            lf2add=-s_vec*coeff/spin1.gamma;
+            lf2add=-s_val*s_vec*coeff/spin2.gamma;
         end
         function coeff=calculate_dip_coeff(obj,spin1,spin2)        
             coord1=spin1.coordinate; gamma1=spin1.gamma;

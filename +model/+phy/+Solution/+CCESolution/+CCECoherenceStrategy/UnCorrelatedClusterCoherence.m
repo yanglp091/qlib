@@ -22,9 +22,7 @@ classdef UnCorrelatedClusterCoherence < model.phy.Solution.CCESolution.CCECohere
             is_secular=evolution_para.is_secular;
             obj.timelist=evolution_para.timelist;
             
-            IntPara.AddContact=evolution_para.AddContact;
-            IntPara.contactInt=evolution_para.contactInt;
-            IntPara.AddDipInt=evolution_para.AddDipInt;
+            IntPara=evolution_para.IntPara;
                         
             obj.spin_collection=obj.bath_spin_collection;
              
@@ -63,11 +61,10 @@ classdef UnCorrelatedClusterCoherence < model.phy.Solution.CCESolution.CCECohere
                 dip_interaction=model.phy.SpinInteraction.DipolarInteraction(cluster);
                 hami1.addInteraction(dip_interaction);
             end
-            if IntPara.AddContact
-                para.interaction=IntPara.contactInt;
-                hami1.addInteraction( XXInteraction(cluster, para));
-                hami1.addInteraction( YYInteraction(cluster, para));
-                hami1.addInteraction( ZZInteraction(cluster, para));
+            if IntPara.AddContact              
+                hami1.addInteraction( XXInteraction(cluster, IntPara));
+                hami1.addInteraction( YYInteraction(cluster, IntPara));
+                hami1.addInteraction( ZZInteraction(cluster, IntPara));
             end
             hami1.getMatrix;
 
@@ -80,10 +77,9 @@ classdef UnCorrelatedClusterCoherence < model.phy.Solution.CCESolution.CCECohere
                 hami2.addInteraction(dip_interaction);
             end
             if IntPara.AddContact
-                para.interaction=IntPara.contactInt;
-                hami2.addInteraction( XXInteraction(cluster, para));
-                hami2.addInteraction( YYInteraction(cluster, para));
-                hami2.addInteraction( ZZInteraction(cluster, para));
+                hami2.addInteraction( XXInteraction(cluster, IntPara));
+                hami2.addInteraction( YYInteraction(cluster, IntPara));
+                hami2.addInteraction( ZZInteraction(cluster, IntPara));
             end
             hami2.getMatrix;
 
@@ -98,6 +94,7 @@ classdef UnCorrelatedClusterCoherence < model.phy.Solution.CCESolution.CCECohere
             reduced_hami=cell(1,2);
             reduced_hami{1,1}=hami1;
             reduced_hami{1,2}=hami2;
+            obj.hami_list=reduced_hami;
        end
        
        function set_local_field(obj,center_spin_state)
@@ -105,7 +102,7 @@ classdef UnCorrelatedClusterCoherence < model.phy.Solution.CCESolution.CCECohere
             center_spin=obj.center_spin;
             for kk=1:nspin
                target_spin=obj.spin_collection.spin_list{kk};
-               local_field=obj.calculate_dipolar_field(target_spin,center_spin,center_spin_state);% this function is defined in AbstractClusterCoherence              
+               local_field=obj.calculate_dipolar_field(center_spin,target_spin,center_spin_state);% this function is defined in AbstractClusterCoherence              
                target_spin.local_field=local_field;
             end            
        end

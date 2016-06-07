@@ -9,7 +9,7 @@ classdef dipInteraction < model.phy.SpinInteraction.SpinChainInteraction.Abstrac
         function obj=dipInteraction(spin_collection, para)
             nspin=spin_collection.getLength;
             n_interaction=size(para.interaction,1);
-            if n_interaction==nspin-1
+            if n_interaction==nspin-1 || nspin==2
                 iter=model.phy.SpinCollection.Iterator.ChainNeighbouringIterator(spin_collection);
             elseif n_interaction==nspin
                 iter=model.phy.SpinCollection.Iterator.ChainNeighbouringIterator(spin_collection,'ring_index');
