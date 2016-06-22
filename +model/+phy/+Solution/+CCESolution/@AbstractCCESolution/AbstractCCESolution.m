@@ -16,8 +16,7 @@ classdef AbstractCCESolution < model.phy.Solution.AbstractSolution
             if obj.parameters.LoadSpinCollection
                 obj.parameters.SpinCollectionStrategy=p.get_parameter('SpinCollection', 'Source');
                 obj.parameters.InputFile=p.get_parameter('SpinCollection', 'FileName');
-                obj.BathSpinParameters(p);
-                disp('spin collection loaded.');
+                obj.BathSpinParameters(p);               
             else
                 obj.BathSpinParameters(p);
             end
