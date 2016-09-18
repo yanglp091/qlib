@@ -21,7 +21,8 @@ classdef ProbeMagR < model.phy.Solution.AbstractSolution
             obj.CentralSpinParameters(p);
             
             obj.parameters.AddContact = p.get_parameter('Interaction', 'AddContact');
-            obj.parameters.contactInt = p.get_parameter('Interaction', 'ContactInt');
+            obj.parameters.contactInt1 = p.get_parameter('Interaction', 'ContactInt1');
+            obj.parameters.contactInt2 = p.get_parameter('Interaction', 'ContactInt2');
             obj.parameters.AddDipInt = p.get_parameter('Interaction', 'AddDipInt');  
             obj.parameters.IsSecularApproximation=p.get_parameter('Interaction', 'IsSecular');
 
@@ -89,7 +90,12 @@ classdef ProbeMagR < model.phy.Solution.AbstractSolution
 
            IntPara.AddDipInt=obj.parameters.AddDipInt;          
            IntPara.AddContact=obj.parameters.AddContact;
-           IntPara.interaction=obj.parameters.contactInt;
+           C1=obj.parameters.contactInt1;
+           C2=obj.parameters.contactInt2;
+           nspin=spin_collection.getLength;
+           vec1=(C2-C1)*ones(1,nspin-2);
+           int_mat=C1*ones(nspin,nspin)+diag(vec1,2)+diag(vec1,-2);
+           IntPara.interaction=int_mat;
            IntPara.AddIndexList=1;
            idx=cell(6,1);idx{1}=[1,2];idx{2}=[2,3];idx{3}=[3,4];idx{4}=[4,1];idx{5}=[1,3];idx{6}=[2,4];
            IntPara.IndexList=idx;

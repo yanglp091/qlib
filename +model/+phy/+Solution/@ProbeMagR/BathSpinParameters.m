@@ -79,10 +79,9 @@ function coord_cell=generate_MagR_coordinate(dist,seed,nseed,rRand)
     rng(seed);
     rand_radius=rRand*rand(nseed,1);
 %     rand_radius=rRand*(0:0.5:2);
-    rotation_angles=0*rand(nseed,1);
+    rotation_angles=pi/4*rand(nseed,1);
 %     rotation_angles=(0:1:45)';
-    rand_vec_list=randn(nseed,2);
-    rand_vec_list=[rand_vec_list,zeros(nseed,1)];
+    rand_vec_list=randn(nseed,3);
 %     philist=-pi:0.1*pi:pi;
 %     rand_vec_list=[cos(philist'),sin(philist'),zeros(nseed,1)];
     coord_cell=cell(1,nspin);

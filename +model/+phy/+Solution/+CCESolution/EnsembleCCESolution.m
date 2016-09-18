@@ -33,6 +33,7 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
   %%    prepearing  
         function [evolution_parameter,cluster_parameter]=pre_calculation(obj,cluster_iterator)
            import model.phy.PhysicalObject.NV
+           import model.phy.PhysicalObject.Spin
 
            evolution_parameter.center_spin_states=obj.parameters.SetCentralSpin.CentralSpinStates;
            evolution_parameter.timelist=obj.parameters.TimeList;
@@ -44,9 +45,10 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
            center_spin_name=obj.parameters.SetCentralSpin.name;
            para_central_spin=obj.parameters.SetCentralSpin; 
            center_spin=eval(strcat(center_spin_name,'(','para_central_spin',')'));
+%             center_spin=Spin('E',[0,0,0]);center_spin.set_spin;
            obj.keyVariables('center_spin')=center_spin;
            
-           cluster_parameter.center_spin=center_spin.espin;
+           cluster_parameter.center_spin=center_spin.espin;            
            cluster_parameter.bath_spin_collection=cluster_iterator.spin_collection;
         end
 
@@ -79,8 +81,8 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
           % But this action is forbidden in parfor circulation. So I have to change the way to construct 
           % the AbstractClusterCoherence class. This is pretty ulgy, but I have to do this. 
           tic
-          parpool();
-          parfor n=1:ncluster 
+%           parpool();
+          parfor n=1:ncluster                      
               Condition=model.phy.LabCondition.getCondition;              
               Condition.setValue('magnetic_field',MagneticField);
 
@@ -88,9 +90,9 @@ classdef EnsembleCCESolution < model.phy.Solution.CCESolution.AbstractCCESolutio
               clst_index=cluster_index_list{n,1};  
               clst_coh=model.phy.Solution.CCESolution.CCECoherenceStrategy.ECCEClusterCoherence(clst_index,clst_para);
               CoherenceMatrix(n,:)=clst_coh.calculate_cluster_coherence(evolu_para);
-              delete(clst_coh);
+              delete(clst_coh);              
           end
-          delete(gcp('nocreate'));
+%           delete(gcp('nocreate'));
 
           toc
           disp('calculation of the cluster-coherence matrix finished.');          

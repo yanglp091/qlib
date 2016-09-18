@@ -26,6 +26,7 @@ function [obs_tf,obs_pro]=get_cluster_transition_spectrum(obj,cluster,IntPara)
     [V,D]=eig(hm0);
     eig_vals=diag(D);
     dim=length(eig_vals);
+    %generate two matrix with the diagonals of D
     eig_mat1=kron(eig_vals,ones(1,dim));eig_mat2=kron(ones(dim,1),eig_vals.');
     %transiton frequency matrix omega_{mn}, here we add a constant 1 to remove the divergence induced by the transition between degenerate states ...
     tf_mat=abs(real(eig_mat1-eig_mat2)+ones(dim,dim));
